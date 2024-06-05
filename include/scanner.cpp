@@ -1,5 +1,5 @@
 #include "../lib/scanner.h"
-//#include "../lib/disco.h"
+#include "../lib/disco.h"
 //#include "../lib/mount.h"
 // #include "../lib/report.h"
 // #include "../lib/filesystem.h"
@@ -15,7 +15,8 @@
 #include <cstdlib>
 using namespace std;
 
-//Disk disco;
+Disk disco;
+
 //Mount mount;
 // Report report;
 // Users user;
@@ -80,7 +81,7 @@ void scanner::functions(string token, vector<string> tks)
 
         }
 
-        //disco.mkdisk(tks); // [-size=10, -u=m, -path=/home/hola.dk]
+        disco.mkdisk(tks); 
     }else if(compare(token, "RMDISK")){
         cout << "Comando reconocido: RMDISK" << endl;
         //disco.rmdisk(tks);
@@ -166,7 +167,7 @@ void scanner::functions(string token, vector<string> tks)
         cout << "Comando reconocido: EXEC" << endl;
         funcion_excec(tks);
     }else if(compare(token.substr(0,1),"#")){
-        respuesta("COMENTARIO",token);
+        respuesta("COMENTARIO RECONOCIDO",token);
     }else{
         errores("SYSTEM","EL COMANDO NO ESTA ENTRE LOS COMANDOS RECONOCIDOS, VERIFICAR >>> \""+token+"\"");
     }
@@ -297,14 +298,14 @@ void scanner::errores(string operacion, string mensaje){
 
 void scanner::respuesta(string operacion, string mensaje){
     
-    cout << "\033[0;42m(" + operacion + ")~~> \033[0m"<< mensaje << endl;
+    cout << "\033[0;42m(" + operacion + ")------> \033[0m"<< mensaje << endl;
 }
 
 bool scanner::confirmar(string mensaje){
-    cout << mensaje << "Confirmar(S), cualquier otra letra para cancelar" << endl;
+    cout << mensaje << "Confirmar(N), Otra letra para cancelar" << endl;
     string respuesta;
     getline(cin,respuesta);
-    if (compare(respuesta, "s"))
+    if (compare(respuesta, "N"))
     {
         return true;
     }
@@ -349,7 +350,7 @@ void scanner::excec(string path){
         if(texto!=""){
             if(compare(texto,"PAUSE")){
                 string pause;
-                respuesta("PAUSE","Presione enter para continuar...");
+                respuesta("PAUSE","Enter para continuar...");
                 getline(cin,pause);
                 continue;
             }
