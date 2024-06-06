@@ -1,6 +1,7 @@
 #include "../lib/scanner.h"
 #include "../lib/disco.h"
-//#include "../lib/mount.h"
+#include "../lib/mount.h"
+
 // #include "../lib/report.h"
 // #include "../lib/filesystem.h"
 // #include "../lib/users.h"
@@ -17,7 +18,7 @@ using namespace std;
 
 Disk disco;
 
-//Mount mount;
+Mount mount;
 // Report report;
 // Users user;
 // Shared shared;
@@ -37,8 +38,7 @@ void scanner::start()
         cout << ">>>>>>>>>>>>>>>>> PROYECTO 1 \n" << endl;
         cout << ">>>>>>>>>>>>>>>>> NATALIA MARIEL CALDERON ECHEVERRIA \n" << endl;
         cout << ">>>>>>>>>>>>>>>>>202200007 \n" << endl;
-        cout << "------------------------------INGRESE UN COMANDO------------------------------\n" << endl;
-        cout << "--------------------------------exit para salir-------------------------------\n" << endl;
+        cout << ">>>>>>>>>>>>>>>>>INGRESE UN COMANDO(exit -> salir) \n" << endl;
         cout << ">>";
         while (true)
         {
@@ -53,11 +53,13 @@ void scanner::start()
             texto.erase(0,tk.length()+1);
             vector<string> tks = split_tokens(texto); //las instrucciones acosiadas a la plabara clave
             functions(tk, tks);
-            cout << "\n >>>>Enter para continuar...." << endl;
+            cout << "\n >>>>continuar ? (enter)" << endl;
             getline(cin,texto);
             Clear();
-            cout << "------------------------------INGRESE UN COMANDO------------------------------\n" << endl;
-            cout << "--------------------------------exit para salir-------------------------------\n" << endl;
+            cout << ">>>>>>>>>>>>>>>>> PROYECTO 1 \n" << endl;
+            cout << ">>>>>>>>>>>>>>>>> NATALIA MARIEL CALDERON ECHEVERRIA \n" << endl;
+            cout << ">>>>>>>>>>>>>>>>>202200007 \n" << endl;
+            cout << ">>>>>>>>>>>>>>>>>INGRESE UN COMANDO(exit -> salir) \n" << endl;
             cout << ">>";
         }
 }
@@ -87,10 +89,10 @@ void scanner::functions(string token, vector<string> tks)
         //disco.rmdisk(tks);
     }else if(compare(token, "FDISK")){
         cout << "Comando reconocido: FDISK" << endl;
-        //disco.fdisk(tks);
+        disco.fdisk(tks);
     }else if(compare(token, "MOUNT")){
         cout << "Comando reconocido: MOUNT" << endl;
-        //mount.mount(tks);
+        mount.mount(tks);
     }else if(compare(token, "UNMOUNT")){
         cout << "Comando reconocido: UNMOUNT" << endl;
         //mount.unmount(tks);

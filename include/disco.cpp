@@ -193,12 +193,12 @@ void Disk::makeDisk(string s, string f, string u, string path){\
 
                 //SE LEE EL DISCO
                 std::cout << ">>>>Nuevo Disco<<<<<<" << std::endl;
-                std::cout << "Size:  "<< discoI.mbr_tamano << std::endl;
-                std::cout << "Fecha:  "<< mostrar_fecha << std::endl;
-                std::cout << "Fit:  "<< discoI.disk_fit << std::endl;
-                std::cout << "Disk_Signature:  "<< discoI.mbr_disk_signature << std::endl;
-                cout << "MBR  BITS:  " << sizeof(Structs::MBR) << endl;
-                std::cout << "Path/RUTA:  "<< path2 << std::endl;
+                std::cout << "tamano >>  "<< discoI.mbr_tamano << std::endl;
+                std::cout << "Fecha >>  "<< mostrar_fecha << std::endl;
+                std::cout << "Fit >>  "<< discoI.disk_fit << std::endl;
+                std::cout << "disk firma >>  "<< discoI.mbr_disk_signature << std::endl;
+                cout << "MBR  BITS >>  " << sizeof(Structs::MBR) << endl;
+                std::cout << "Path/RUTA >>  "<< path2 << std::endl;
             }
             fclose(imprimir);
 
@@ -210,6 +210,9 @@ void Disk::makeDisk(string s, string f, string u, string path){\
     }
 
 }
+
+
+//RMDISK --> ELIMINAR
 
 
 
@@ -224,6 +227,7 @@ void Disk::fdisk(vector<string> context){
         if (current.substr(0, 1) == "\"") {
             current = current.substr(1, current.length() - 2);
         }
+        //SI ENCUENTRA EL COMANDO DELETE
         if (shared.compare(id, "delete")) {
             dlt = true;
         }
@@ -279,7 +283,7 @@ void Disk::fdisk(vector<string> context){
             }
         }
         if (!required.empty()) {
-            shared.handler("FDISK", "create requiere parámetros obligatorios");
+            shared.handler("FDISK", "Parametros obligatorios vacios para add -> agregarlos");
             return;
         }
         if (add.empty()) {
@@ -324,7 +328,7 @@ void Disk::fdisk(vector<string> context){
             }
         }
         if (required.size() != 0) {
-            shared.handler("FDISK", "delete requiere parámetros obligatorios");
+            shared.handler("FDISK", "Parametros obligatorios vacios para add -> agregarlos");
             return;
         }
         //deletepartition(_delete, path, name);
@@ -394,88 +398,115 @@ Structs::Partition Disk::findby(Structs::MBR mbr, string name, string path) {
             }
         }
     }
-    throw runtime_error("la partición no existe");
+    throw runtime_error("NO EXISTE UNA PARTICION CON ESE NOMBRE");
 }
 
 
+
+//PARTICION
+
 void Disk::generatepartition(string s, string u, string p, string t, string f, string n, string a){
     try{
+        //VERIFICACIONES DE ERRORES
         startValue = 0;
         int i = stoi(s);
         if(i <= 0){
-            shared.handler("FDISK", "Size debe ser mayor a 0");
+            shared.handler("FDISK", "EL TAMANO DEBE SER MAYOR DE 0");
             return;
         }
+        //STANDARD: KILO SI NO VIENE ---> COMPARAR ENTRE B, K Y M
         if(shared.compare(u, "b") || shared.compare(u, "k") || shared.compare(u, "m")){
             if(!shared.compare(u, "b")){
+                //TERMARIO   --> MEGA Y BYTES
                 i *= (shared.compare(u, "k") ? 1024 : 1024 * 1024);
             }
         }else{
-            shared.handler("FDISK", "U debe ser b, k o m");
+            shared.handler("FDISK", "El valor  debe ser: M,B O K; cualquiera de esos no es valido");
             return;
         }
+        //ruta --> las comillas ver si tiene y quitarlas
         if(p.substr(0,1) == "\""){
             p = p.substr(1,p.length()-2);
+            //! menos 2, se quita la 1
         }
+        //particion -> primario, extenido y logico
         if(!(shared.compare(t, "p") || shared.compare(t, "e") || shared.compare(t, "l"))){
-            shared.handler("FDISK", "El tipo debe ser p, e o l");
+            shared.handler("FDISK", "El valor  debe ser: P, E o L; cualquiera de esos no es valido");
             return;
         }
+        //BEST FIR, WORST FIT Y FIRST FIT -- IGUAL QUE EN MK
         if(!(shared.compare(f, "bf") || shared.compare(f, "ff") || shared.compare(f, "wf"))){
-            shared.handler("FDISK", "El fit debe ser bf, ff o wf");
+            shared.handler("FDISK", "El valor  debe ser: FF,BF o WF; cualquiera de esos no es valido");
             return;
         }
         Structs::MBR disco;
+
+        //VERIFICACION QUE PIDE - ERROR
         FILE *file = fopen(p.c_str(), "rb+");
         if(file == NULL){
-            shared.handler("FDISK", "El disco no existe");
+            shared.handler("FDISK", "Se intenta partir un disco que no existe -> revisar ruta");
             return;
         }else{
             rewind(file);
+            //SE LEE Y SE REESCTRUCTURA
             fread(&disco, sizeof(Structs::MBR), 1, file);
         }
         fclose(file);
 
-        vector<Structs::Partition> particiones = getPartitions(disco); // vector de particiones, a un inicio vacio
+// EMPIEZA EL VECTOR DE PARTICION, INICIO VACIO - LISTA DE PARTICION
+// ERROR -< MBR AL INICIO!!!
+
+        vector<Structs::Partition> particiones = getPartitions(disco); 
         vector<Transition> between;
 
         int used = 0;
         int ext = 0;
         int c = 1;
+        // BASE ES EL PESO
         int base = sizeof(disco);
+        // SE OBTIENEN LAS PARTICIONES
         Structs::Partition extended;
+
+        //RECORRER LAS PARTICIONES ---> recorrer las 4 particiones creadas
+//particiones creadas, datos vacios
         for(Structs::Partition p : particiones){
             if(p.part_status == '1'){
                 Transition trn;
                 trn.partition = c;
                 trn.start = p.part_start;
+                //puntero final, donde inicio mas el tamano
                 trn.end = p.part_start + p.part_size;
 
                 trn.before = trn.start - base;
                 base = trn.end;
 
                 if(used != 0){
+                    //esto es si ya se modifico, si es dist de 0
                     between.at(used-1).after = trn.start - between.at(used-1).end; 
                 }
                 between.push_back(trn);
                 used++;
 
+//particion extendida (adentro logicas)
                 if(p.part_type == 'e' || p.part_type == 'E'){
                     ext++;
                     extended = p;
                 }
             }
+            //revisar porque max 4. SI ES LOGICA COMO VA DENTRO SI
+
             if(used == 4 && !(shared.compare(t, "l"))){
-                shared.handler("FDISK", "No se pueden crear mas particiones primarias");
+                shared.handler("FDISK", "Particiones: 4 - NO SE PUEDEN CREAR MAS PARTICIONES PRIMARIAS");
                 return;
             }else if(ext==1 && !(shared.compare(t, "e"))){
-                shared.handler("FDISK", "No se pueden crear mas particiones extendidas");
+                shared.handler("FDISK", "--- NO SE PUEDEN CREAR MAS PARTICIONES EXTENDIDAS");
                 return;
             }
             c++;
         }
+        //LOGICA PROPIA DE LAS PARTICIONES LOGICAS --< DENTRO DE EXTENDIDAD
         if(ext == 0 && shared.compare(t, "l")){
-            shared.handler("FDISK", "No se puede crear una particion logica sin una extendida");
+            shared.handler("FDISK", "LAS PARTICIONES LOGICAS NECESITAN DE UNA PARTICION EXTENDIDA. <no se puede crear una sin una extendida previa>");
             return;
         }
         if(used != 0){
@@ -484,23 +515,26 @@ void Disk::generatepartition(string s, string u, string p, string t, string f, s
 
         try{
             findby(disco, n,p);
-            shared.handler("FDISK", "Ya existe una particion con ese nombre");
+            shared.handler("FDISK", "nombre de particion repetido, cambiar nombre o revisar particiones");
             return;
         }catch(exception &e){}
 
-        // Aqui se crea la particion que el usuario este mandando
+        // ACA YA SE HACE LA PARTICIOM ---> LUEGO DE LAS VERIFICACIONES, FIJO LOS DATOS SON VALIDOS
         Structs::Partition newPartition;
         newPartition.part_status = '1';
-        newPartition.part_size = i; 
-        newPartition.part_type = toupper(t[0]); // P, E, L
-        newPartition.part_fit = toupper(f[0]); // B, F, W
-        strcpy(newPartition.part_name, n.c_str()); // Nombre de la particion
+        newPartition.part_size = i; //size
+        newPartition.part_type = toupper(t[0]); // P, E, L --> T
+        newPartition.part_fit = toupper(f[0]); // B, F, W ---> F
+        strcpy(newPartition.part_name, n.c_str()); // NOMBRE DE LA NUEVA
 
         if(shared.compare(t, "l")){
             // Aqui se crea la particion logica
+            shared.response("FDISK", "<<Particion logica>>");
         }
 
         disco = adjust(disco, newPartition, between, particiones, used);
+
+
 
         FILE *bfile = fopen(p.c_str(), "rb+");
         if(bfile != NULL){
@@ -513,11 +547,11 @@ void Disk::generatepartition(string s, string u, string p, string t, string f, s
                 fwrite(&ebr, sizeof(Structs::EBR), 1, bfile);
             }
             fclose(bfile);
-            shared.response("FDISK", "Particion creada correctamente");
+            shared.response("FDISK", "Particion creada!!!!");
         }
 
     }catch (invalid_argument &e) {
-        shared.handler("FDISK", "-s debe ser un entero");
+        shared.handler("FDISK", "el valor de s debe ser entero, no decimal");
         return;
     }
     catch (exception &e) {
@@ -526,7 +560,7 @@ void Disk::generatepartition(string s, string u, string p, string t, string f, s
     }
 };
 
-
+//las particiones de una
 vector<Structs::Partition> Disk::getPartitions(Structs::MBR mbr){
     vector<Structs::Partition> partitions;
     partitions.push_back(mbr.mbr_Partition_1);
@@ -538,8 +572,10 @@ vector<Structs::Partition> Disk::getPartitions(Structs::MBR mbr){
 
 Structs::MBR
 
+//que reciba el vector de transiciones
 Disk::adjust(Structs::MBR mbr, Structs::Partition p, vector<Transition> t, vector<Structs::Partition> ps, int u){
     if (u == 0) {
+        //primer puntero -< primera transicion
         p.part_start = sizeof(mbr);
         startValue = p.part_start;
         mbr.mbr_Partition_1 = p;
@@ -665,7 +701,7 @@ Disk::adjust(Structs::MBR mbr, Structs::Partition p, vector<Transition> t, vecto
             mbr.mbr_Partition_4 = partitions[3];
             return mbr;
         } else {
-            throw runtime_error("No hay espacio suficiente para esta particion");
+            throw runtime_error("YA NO HAY ESPACION PARA LA PARTICION");
         }
     }
 }
@@ -714,7 +750,7 @@ void Disk::addpartition(string add, string u, string n, string p) {
                                     partitions[i].part_size += i;
                                     break;
                                 } else {
-                                    throw runtime_error("se sobrepasa el límite");
+                                    throw runtime_error("se sobrepasa el límite(1)");
                                 }
                             }
                         }
@@ -723,7 +759,7 @@ void Disk::addpartition(string add, string u, string n, string p) {
                             partitions[i].part_size += i;
                             break;
                         } else {
-                            throw runtime_error("se sobrepasa el límite");
+                            throw runtime_error("se sobrepasa el límite(2)");
                         }
 
                     }
@@ -738,7 +774,7 @@ void Disk::addpartition(string add, string u, string n, string p) {
 
         rewind(file);
         fwrite(&disk, sizeof(Structs::MBR), 1, file);
-        shared.response("FDISK", "la partición se ha aumentado correctamente");
+        shared.response("FDISK", "PARTICION AUMENTADA");
         fclose(file);
     }
     catch (exception &e) {

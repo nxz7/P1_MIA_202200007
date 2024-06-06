@@ -32,6 +32,8 @@ class Disk{
 
 //ELIMINAR
         void rmdisk(vector<string> context);
+
+        //funciones - particiones
         void fdisk(vector<string> context);
         void generatepartition(string s, string u, string p, string t, string f, string n, string a);
         void deletepartition(string d, string p, string n);
@@ -40,9 +42,12 @@ class Disk{
         vector<Structs::Partition> getPartitions(Structs::MBR disk);
 
         Structs::MBR
+        //recibe la info
         adjust(Structs::MBR mbr, Structs::Partition p, vector<Transition> t, vector<Structs::Partition> ps, int u);
 
         Structs::Partition findby(Structs::MBR mbr, string name, string path);
+
+//particion logica --> logicas dentro de las extendidas. Si se elimina extendida se elimina la logica
 
         void logic(Structs::Partition partition, Structs::Partition ep, string p);
 
