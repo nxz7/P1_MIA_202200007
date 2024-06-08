@@ -31,20 +31,22 @@ class Mount
 //MONTAR Y DESMONTAR
 
     void mount(vector<string> command);
-    void unmount(vector<string> command);
+    void unmount(vector<string> command); //este es el que se esta usando, pasa el commando id
     void mount(string path, string name);
     void unmount(string id);  //RECIBE SOLO EL ID
 
 
-    void listmount(); //LISTA DE LOS MONTADOS
+    void discosMontado(); //LISTA DE LOS MONTADOS
 
     Structs::Partition getMount(string id, string *p);
 
     private:
     Disk dsk;
     Shared shared;
-    
-    vector<char> alfabeto = {'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z'};
+    vector<char> simbolos = {
+            'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p',
+            'q','r','s','t','u','v','w','x','y','z',
+            '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'};
     vector<string> mountedIds;
 
 };

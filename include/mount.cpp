@@ -13,7 +13,7 @@ void Mount::mount(vector<string> command){
     
     //SOLO PARA LISTA LOS QUE ESTAN MONTADOS
     if(command.empty()){
-        listmount();
+        discosMontado();
         return;
     }
 
@@ -95,9 +95,9 @@ void Mount::mount(string p, string n){
                     if (Mount::mounted[i].mpartitions[j].status == '0') {
                         //ESTABLECER LA MANERA EN LA QUE SE PIDE #id=07Disco1
                         mounted[i].mpartitions[j].status = '1';
-                        mounted[i].mpartitions[j].letter = alfabeto.at(j);
+                        mounted[i].mpartitions[j].letter = simbolos.at(j);
                         strcpy(mounted[i].mpartitions[j].name, n.c_str());
-                        string re = to_string(i + 1) + alfabeto.at(j);
+                        string re = to_string(i + 1) + simbolos.at(j);
                         //lista
                         mountedIds.push_back("07" + re);
 
@@ -115,9 +115,9 @@ void Mount::mount(string p, string n){
                 for (int j = 0; j < 26; j++) {
                     if (Mount::mounted[i].mpartitions[j].status == '0') {
                         mounted[i].mpartitions[j].status = '1';
-                        mounted[i].mpartitions[j].letter = alfabeto.at(j);
+                        mounted[i].mpartitions[j].letter = simbolos.at(j);
                         strcpy(mounted[i].mpartitions[j].name, n.c_str());
-                        string re = to_string(i + 1) + alfabeto.at(j);
+                        string re = to_string(i + 1) + simbolos.at(j);
                         mountedIds.push_back("07" + re);
                         shared.response("MOUNT", "SE MONTO EL DISCO ---> -id=07" + re);
                         return;
@@ -133,13 +133,13 @@ void Mount::mount(string p, string n){
 
 }
 
-void Mount::listmount() {
+void Mount::discosMontado() {
     cout << "\n<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<MONTADOS>>>>>>>>>>>>>>>>>>>>>>>>>>>" << endl;
-        cout << "\n<<<< id >>>>  I <<<< nombre >>>>" << endl;
+        cout << "\n<<<< id >>>>  - <<<< nombre >>>>" << endl;
     for (int i = 0; i < 99; i++) {
         for (int j = 0; j < 26; j++) {
             if (mounted[i].mpartitions[j].status == '1') {
-                cout << "> 07" << i + 1 << alfabeto.at(j) << "disco I " << mounted[i].mpartitions[j].name << endl;
+                cout << "> 07" << i + 1 << simbolos.at(j) << "disco - " << mounted[i].mpartitions[j].name << endl;
             }
         }
     }
@@ -175,7 +175,7 @@ void Mount::unmount(vector<string> command) {
         // quitarlo del array
         for (int i = 0; i < 99; i++) {
             for (int j = 0; j < 26; j++) {
-                string re = to_string(i + 1) + alfabeto.at(j);
+                string re = to_string(i + 1) + simbolos.at(j);
                 if ("07" + re == id && mounted[i].mpartitions[j].status == '1') {
                     mounted[i].mpartitions[j].status = '0';
                     shared.response("UNMOUNT", "SE DESMONTO EL DISCO ---> -id=07" + re);

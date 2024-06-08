@@ -25,43 +25,43 @@ void Disk::mkdisk(vector<string> tokens){
     string path = "";
     string f = "";
     bool error = false;
-    for(string token:tokens){
-        string tk = token.substr(0, token.find("=")); // -f=b
-        token.erase(0,tk.length()+1); // b
-        if(scan.compare(tk, "f")){
+    for(string rec:tokens){
+        string par = rec.substr(0, rec.find("=")); // -f=b
+        rec.erase(0,par.length()+1); // b
+        if(scan.compare(par, "f")){
             if(f.empty()){
                 //F ES OPCIONAL -> BEST, WORST, FIRST --> SI NO SE TOMA EL 1
-                f = token; // f = b
+                f = rec; // f = b
             }else{
-                scan.errores("MKDISK", " parametro f, ya eingresado ->"+tk);
+                scan.errores("MKDISK", " parametro f, ya eingresado ->"+par);
             }
-        }else if(scan.compare(tk, "s")){
+        }else if(scan.compare(par, "s")){
             if (size.empty())
             {
                 // parametro size
-                size = token;
+                size = rec;
             }else{
-                scan.errores("MKDISK","tamaño ya ingresado ->"+tk);
+                scan.errores("MKDISK","tamaño ya ingresado ->"+par);
             }
-        }else if (scan.compare(tk, "u"))
+        }else if (scan.compare(par, "u"))
         {
             if (u.empty())
             {
                 //OPCIONAL -> SI NO MEGA BYTES
-                u = token;
+                u = rec;
             }else{
-                scan.errores("MKDISK","U, ya esta ingresado -> "+tk);
+                scan.errores("MKDISK","U, ya esta ingresado -> "+par);
             }
-        }else if (scan.compare(tk, "path"))
+        }else if (scan.compare(par, "path"))
         {
             if (path.empty())
             {
-                path = token;
+                path = rec;
             }else{
-                scan.errores("MKDISK","PATH, revisar el comando"+tk);
+                scan.errores("MKDISK","PATH, revisar el comando"+par);
             }    
         }else{
-            scan.errores("MKDISK","parametro no necesario o esperado -->  "+tk);
+            scan.errores("MKDISK","parametro no necesario o esperado -->  "+par);
             error = true;
             break;
         }
@@ -219,20 +219,20 @@ void Disk::rmdisk(vector<string> tokens) {
     bool error = false;
 
     // se jala el parametros >> verificar que si venga -> obligatorio
-    for (string token : tokens) {
-        string tk = token.substr(0, token.find("="));
-        token.erase(0, tk.length() + 1);
+    for (string rec : tokens) {
+        string par = rec.substr(0, rec.find("="));
+        rec.erase(0, par.length() + 1);
 
-        if (scan.compare(tk, "path")) {
+        if (scan.compare(par, "path")) {
             if (path.empty()) {
-                path = token;
+                path = rec;
             } else {
-                scan.errores("RMDISK", "ya hay un path ingresado" + tk);
+                scan.errores("RMDISK", "ya hay un path ingresado" + par);
                 error = true;
                 break;
             }
         } else {
-            scan.errores("RMDISK", "parametro inesperado (unicamente se necesita path)" + tk);
+            scan.errores("RMDISK", "parametro inesperado (unicamente se necesita path)" + par);
             error = true;
             break;
         }
@@ -386,7 +386,8 @@ void Disk::fdisk(vector<string> context){
             shared.handler("FDISK", "Parametros obligatorios vacios -> agregarlos");
             return;
         }
-        //deletepartition(_delete, path, name);
+        //shared.response("FDISK", "PARTICION AUMENTADA");
+        shared.response("FDISK - delete", "comando ejecutado correctamente");
     }
 }
 
@@ -806,6 +807,7 @@ void Disk::addpartition(string add, string u, string n, string p) {
                                     break;
                                 } else {
                                     throw runtime_error("se sobrepasa el límite(1)");
+                                    shared.response("FDISK", "PARTICION AUMENTADA");
                                 }
                             }
                         }

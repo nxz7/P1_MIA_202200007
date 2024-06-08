@@ -2,10 +2,6 @@
 #include "../lib/disco.h"
 #include "../lib/mount.h"
 
-// #include "../lib/report.h"
-// #include "../lib/filesystem.h"
-// #include "../lib/users.h"
-// #include "../lib/filemanager.h"
 #include <iostream>
 #include <stdlib.h>
 #include <locale>
@@ -19,10 +15,7 @@ using namespace std;
 Disk disco;
 
 Mount mount;
-// Report report;
-// Users user;
-// Shared shared;
-// FileManager filemanager;
+
 bool logued = false;
 scanner::scanner()
 {
@@ -49,10 +42,10 @@ void scanner::start()
             {
                 break;
             }
-            string tk = token(texto); //este es la plabra clave
-            texto.erase(0,tk.length()+1);
-            vector<string> tks = split_tokens(texto); //las instrucciones acosiadas a la plabara clave
-            functions(tk, tks);
+            string par = rec(texto); //este es la plabra clave
+            texto.erase(0,par.length()+1);
+            vector<string> parametros = recAgrupar_tokens(texto); //las instrucciones acosiadas a la plabara clave  -parametros
+            functions(par, parametros);
             cout << "\n >>>>continuar ? (enter)" << endl;
             getline(cin,texto);
             Clear();
@@ -68,173 +61,154 @@ void scanner::start()
 
 
 
-void scanner::functions(string token, vector<string> tks)
+void scanner::functions(string rec, vector<string> parametros)
 {
-    if (compare(token, "MKDISK"))
+    if (compare(rec, "MKDISK"))
     {
         //cout << "Comando reconocido: " << endl;
         cout << "Comando reconocido: MKDISK" << endl;
 
         cout << "comando recibido:"<<endl;
 
-        for (int i=0; i<tks.size();i++)
+        for (int i=0; i<parametros.size();i++)
          {
-            cout << tks[i] <<endl;
+            cout << parametros[i] <<endl;
 
         }
 
-        disco.mkdisk(tks); 
-    }else if(compare(token, "RMDISK")){
+        disco.mkdisk(parametros); 
+    }else if(compare(rec, "RMDISK")){
         cout << "Comando reconocido: RMDISK" << endl;
-        disco.rmdisk(tks);
+        disco.rmdisk(parametros);
 
-    }else if(compare(token, "FDISK")){
+    }else if(compare(rec, "FDISK")){
         cout << "Comando reconocido: FDISK" << endl;
-        disco.fdisk(tks);
-    }else if(compare(token, "MOUNT")){
+        disco.fdisk(parametros);
+
+    }else if(compare(rec, "MOUNT")){
         cout << "Comando reconocido: MOUNT" << endl;
-        mount.mount(tks);
-    }else if(compare(token, "UNMOUNT")){
+        mount.mount(parametros);
+
+    }else if(compare(rec, "UNMOUNT")){
         cout << "Comando reconocido: UNMOUNT" << endl;
-        mount.unmount(tks);
+        mount.unmount(parametros);
 
 
 
-    }else if(compare(token, "MKFS")){
+    }else if(compare(rec, "MKFS")){
         cout << "Comando reconocido: MKFS" << endl;
-        //FileSystem fileSystem = FileSystem(mount);
-        //fileSystem.mkfs(tks);
 
-    }else if(compare(token, "LOGIN")){
+
+    }else if(compare(rec, "LOGIN")){
 
         cout << "Comando reconocido: LOGIN" << endl;
         cout << "------> iniciando sesion" << endl;
-        if(logued){
-            //shared.handler("LOGIN", " ya existe una sesion abierta");
-            return;
-        }
-        //logued = user.login(tks,mount);
 
-    }else if(compare(token, "LOGOUT")){
+
+    }else if(compare(rec, "LOGOUT")){
 
         cout << "Comando reconocido: LOGOUT" << endl;
         cout << "------> cerrando sesion" << endl;
-        if(!logued){
-        //    shared.handler("LOGOUT", " debe de iniciar sesion primero");
-            return;
-        }
-        //logued = user.logout();
 
-    }else if(compare(token, "MKGRP")){
-        if(!logued){
-        //    shared.handler("MKGRP", " debe de iniciar sesion primero");
-            return;
-        }
+
+    }else if(compare(rec, "MKGRP")){
+
         cout << "Comando reconocido:  MKGRP" << endl;
-        //user.grp(tks,"MK");
 
-    }else if(compare(token, "RMGRP")){
-        if(!logued){
-        //    shared.handler("RMGRP", " debe de iniciar sesion primero");
-            return;
-        }
+
+    }else if(compare(rec, "RMGRP")){
+
         cout << "Comando reconocido: RMGRP" << endl;
-        //user.grp(tks,"RM");
 
-    }else if(compare(token, "MKUSR")){
-        if(!logued){
-        //    shared.handler("MKUSR", " debe de iniciar sesion primero");
-            return;
-        }
+
+    }else if(compare(rec, "MKUSR")){
+
         cout << "Comando reconocido: MKUSR" << endl;
-        //user.usr(tks,"MK");
 
-    }else if(compare(token, "RMUSR")){
-        if(!logued){
-        //    shared.handler("RMUSR", " debe de iniciar sesion primero");
-            return;
-        }
+
+    }else if(compare(rec, "RMUSR")){
+
         cout << "Comando reconocido: RMUSR" << endl;
-        //user.usr(tks,"RM");
 
-    }else if(compare(token, "MKDIR")){
-        if(!logued){
-        //    shared.handler("MKDIR", " debe de iniciar sesion primero");
-            return;
-        }
-        string p;
+
+    }else if(compare(rec, "MKDIR")){
+
         cout << "Comando reconocido: MKDIR" << endl;
-        //Structs::Partition partition = mount.getmount(user.logged.id, &p);
-        //filemanager.mkdir(tks, partition, p);
-    }else if(compare(token, "REP")){
+
+    }else if(compare(rec, "REP")){
         cout << "Comando reconocido: REPORTES" << endl;
-        //report.generar(tks, mount);
-    }else if(compare(token, "EXEC")){
+        //generar los dos reportes principaes <--------------------
+        //mbr y disk
+
+
+    }else if(compare(rec, "EXEC")){
         cout << "Comando reconocido: EXEC" << endl;
-        funcion_excec(tks);
-    }else if(compare(token.substr(0,1),"#")){
-        respuesta("COMENTARIO RECONOCIDO",token);
+        runExecute(parametros);
+
+    }else if(compare(rec.substr(0,1),"#")){
+        respuesta(">>>> COMENTARIO RECONOCIDO :) ",rec);
+
     }else{
-        errores("SYSTEM","EL COMANDO NO ESTA ENTRE LOS COMANDOS RECONOCIDOS, VERIFICAR >>> \""+token+"\"");
+        errores("SYSTEM","EL COMANDO NO ESTA ENTRE LOS COMANDOS RECONOCIDOS, VERIFICAR! >>> \""+rec+"\"");
     }
 }
 
 
 //revisa la plabra y mira que no sea un comentario, si es se trata como comentario -> break
-string scanner::token(string text)
+string scanner::rec(string text)
 {
-    string tkn = "";
-    bool terminar = false;
+    string pal = "";
+    bool fin = false;
     for (char &c : text){
-        if (terminar)
+        if (fin)
         {
             if (c == ' ' || c == '-'){
                 break;
             }
-            tkn += c;
+            pal += c;
         }
-        else if ((c != ' ' && !terminar))
+        else if ((c != ' ' && !fin))
         {
             if (c=='#'){
-                tkn=text;
+                pal=text;
                 break;
             }else{
-                tkn += c;
-                terminar = true;
+                pal += c;
+                fin = true;
             }
         }
     }
-    return tkn;
+    return pal;
 }
 
-vector<string> scanner::split(string text, string text_split)
+vector<string> scanner::recAgrupar(string text, string text_recAgrupar)
 {
-    vector<string> cadena;
+    vector<string> strr;
     if (text.empty())
     {
-        return cadena;
+        return strr;
     }
     
     int n = text.length();
     char char_array[n + 1];
     strcpy(char_array, text.c_str());
-    char* point = strtok(char_array, text_split.c_str());
+    char* point = strtok(char_array, text_recAgrupar.c_str());
     while (point!=NULL)
     {
-        cadena.push_back(string(point));
-        point = strtok(NULL, text_split.c_str());
+        strr.push_back(string(point));
+        point = strtok(NULL, text_recAgrupar.c_str());
     }
-    return cadena;
+    return strr;
 }
 
-vector<string> scanner::split_tokens(string text){
+vector<string> scanner::recAgrupar_tokens(string text){
     vector<string> tokens;
     if (text.empty())
     {
         return tokens;
     }
     text.push_back(' ');
-    string token = "";
+    string rec = "";
     int estado = 0;
     for(char &c: text){
         if (estado ==0 && c=='-')
@@ -271,11 +245,11 @@ vector<string> scanner::split_tokens(string text){
             }else if (estado ==4 && c==' ')
             {
                 estado = 0;
-                tokens.push_back(token);
-                token = "";
+                tokens.push_back(rec);
+                rec = "";
                 continue;
             }
-            token+=c;
+            rec+=c;
         }
     }
     return tokens;
@@ -304,14 +278,14 @@ void scanner::errores(string operacion, string mensaje){
 
 void scanner::respuesta(string operacion, string mensaje){
     
-    cout << "\033[0;42m(" + operacion + ")------> \033[0m"<< mensaje << endl;
+    cout << "\033[0;42m<" + operacion + ">---------> \033[0m"<< mensaje << endl;
 }
 
 bool scanner::confirmar(string mensaje){
-    cout << mensaje << "Confirmar(N), Otra letra para cancelar" << endl;
+    cout << mensaje << "Confirmar(n), Otra letra para cancelar" << endl;
     string respuesta;
     getline(cin,respuesta);
-    if (compare(respuesta, "N"))
+    if (compare(respuesta, "n"))
     {
         return true;
     }
@@ -319,20 +293,20 @@ bool scanner::confirmar(string mensaje){
     
 }
 
-void scanner::funcion_excec(vector<string> tokens){
+void scanner::runExecute(vector<string> tokens){
     string path = "";
-    for (string token:tokens)
+    for (string rec:tokens)
     {
-        string tk = token.substr(0, token.find("="));
-        token.erase(0,tk.length()+1);
-        if (compare(tk, "path"))
+        string par = rec.substr(0, rec.find("="));
+        rec.erase(0,par.length()+1);
+        if (compare(par, "path"))
         {
-            path = token;
+            path = rec;
         }
     }
     if (path.empty())
     {
-        errores("EXEC","Se requiere path para este comando");
+        errores("EXEC","el path es un dato obligatorio, agregar");
         return;
     }
     excec(path);
@@ -340,29 +314,29 @@ void scanner::funcion_excec(vector<string> tokens){
 
 void scanner::excec(string path){
     string filename(path);
-    vector <string> lines;
+    vector <string> flz;
     string line;
     ifstream input_file(filename);
     if(!input_file.is_open()){
-        cerr << "No se puede abrir el archivo" << filename << endl;
+        cerr << "no se pudo ejecutar el comando, debido al archivo" << filename << endl;
         return;
     }
     while(getline(input_file,line)){
-        lines.push_back(line);
+       flz.push_back(line);
     }
-    for(const auto &i:lines){
+    for(const auto &i:flz){
         string texto = i;
-        string tk = token(texto);
+        string par = rec(texto);
         if(texto!=""){
             if(compare(texto,"PAUSE")){
                 string pause;
-                respuesta("PAUSE","Enter para continuar...");
+                respuesta("PAUSE","desea continuar? (enter)");
                 getline(cin,pause);
                 continue;
             }
-            texto.erase(0,tk.length()+1);
-            vector <string> tks = split_tokens(texto);
-            functions(tk,tks);
+            texto.erase(0,par.length()+1);
+            vector <string> parametros = recAgrupar_tokens(texto);
+            functions(par,parametros);
         }
     }
     input_file.close();
