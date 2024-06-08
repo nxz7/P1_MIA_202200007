@@ -4,6 +4,7 @@
 
 #include <vector>
 #include <iostream>
+#include <cstdio> 
 #include <stdlib.h>
 #include <string>
 #include <algorithm>
@@ -213,9 +214,63 @@ void Disk::makeDisk(string s, string f, string u, string path){\
 
 
 //RMDISK --> ELIMINAR
+void Disk::rmdisk(vector<string> tokens) {
+    string path = "";
+    bool error = false;
 
+    // se jala el parametros >> verificar que si venga -> obligatorio
+    for (string token : tokens) {
+        string tk = token.substr(0, token.find("="));
+        token.erase(0, tk.length() + 1);
 
+        if (scan.compare(tk, "path")) {
+            if (path.empty()) {
+                path = token;
+            } else {
+                scan.errores("RMDISK", "ya hay un path ingresado" + tk);
+                error = true;
+                break;
+            }
+        } else {
+            scan.errores("RMDISK", "parametro inesperado (unicamente se necesita path)" + tk);
+            error = true;
+            break;
+        }
+    }
 
+    // si hay un error que se salga -> no se caiga el proyecto
+    if (error) {
+        return;
+    }
+
+    // el path si tiene que estar -> si no error
+    if (path.empty()) {
+        scan.errores("RMDISK", "El path es un parametro obligatorio, por favor agregar");
+        return;
+    }
+
+    // quitar comillas
+    if (path.front() == '"' && path.back() == '"') {
+        path = path.substr(1, path.length() - 2);
+    }
+
+    // ver si existe
+    FILE *file = fopen(path.c_str(), "r");
+    if (file != NULL) {
+        fclose(file);
+
+        // Delete
+        if (remove(path.c_str()) == 0) {
+            scan.respuesta("RMDISK", "El disco se a eliminado correctamente: " + path);
+        } else {
+            scan.errores("RMDISK", "<<ocurrio un error al intentar eliminar el disco>>: " + path);
+        }
+    } else {
+        scan.errores("RMDISK", "Este disco no existe o no es reconocido, revisar: " + path);
+    }
+}
+
+//---------------------------------
 
 // FDISK
 
@@ -283,7 +338,7 @@ void Disk::fdisk(vector<string> context){
             }
         }
         if (!required.empty()) {
-            shared.handler("FDISK", "Parametros obligatorios vacios para add -> agregarlos");
+            shared.handler("FDISK", "Parametros obligatorios vacios -> agregarlos");
             return;
         }
         if (add.empty()) {
@@ -293,7 +348,7 @@ void Disk::fdisk(vector<string> context){
         }
 
     } else {
-        vector<string> required = {"p", "n", "delete"};
+        vector<string> required = {"path", "name", "delete"};
         string _delete;
         string path;
         string name;
@@ -305,13 +360,13 @@ void Disk::fdisk(vector<string> context){
                 current = current.substr(1, current.length() - 2);
             }
 
-            if (shared.compare(id, "p")) {
+            if (shared.compare(id, "path")) {
                 if (count(required.begin(), required.end(), id)) {
                     auto itr = find(required.begin(), required.end(), id);
                     required.erase(itr);
                     path = current;
                 }
-            } else if (shared.compare(id, "n")) {
+            } else if (shared.compare(id, "name")) {
                 if (count(required.begin(), required.end(), id)) {
 
                     auto itr = find(required.begin(), required.end(), id);
@@ -328,7 +383,7 @@ void Disk::fdisk(vector<string> context){
             }
         }
         if (required.size() != 0) {
-            shared.handler("FDISK", "Parametros obligatorios vacios para add -> agregarlos");
+            shared.handler("FDISK", "Parametros obligatorios vacios -> agregarlos");
             return;
         }
         //deletepartition(_delete, path, name);
@@ -499,7 +554,7 @@ void Disk::generatepartition(string s, string u, string p, string t, string f, s
                 shared.handler("FDISK", "Particiones: 4 - NO SE PUEDEN CREAR MAS PARTICIONES PRIMARIAS");
                 return;
             }else if(ext==1 && !(shared.compare(t, "e"))){
-                shared.handler("FDISK", "--- NO SE PUEDEN CREAR MAS PARTICIONES EXTENDIDAS");
+                shared.handler("FDISK", "--- NO SE PUEDEN CREAR MAS PARTICIONES EXTENDIDAS, ya hay 1");
                 return;
             }
             c++;

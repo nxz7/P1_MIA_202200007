@@ -98,6 +98,8 @@ void Mount::mount(string p, string n){
                         mounted[i].mpartitions[j].letter = alfabeto.at(j);
                         strcpy(mounted[i].mpartitions[j].name, n.c_str());
                         string re = to_string(i + 1) + alfabeto.at(j);
+                        //lista
+                        mountedIds.push_back("07" + re);
 
                         shared.response("MOUNT", "SE MONTO EL DISCO ---> -id=07" + re);
                         return;
@@ -116,6 +118,7 @@ void Mount::mount(string p, string n){
                         mounted[i].mpartitions[j].letter = alfabeto.at(j);
                         strcpy(mounted[i].mpartitions[j].name, n.c_str());
                         string re = to_string(i + 1) + alfabeto.at(j);
+                        mountedIds.push_back("07" + re);
                         shared.response("MOUNT", "SE MONTO EL DISCO ---> -id=07" + re);
                         return;
                     }
@@ -139,5 +142,48 @@ void Mount::listmount() {
                 cout << "> 07" << i + 1 << alfabeto.at(j) << "disco I " << mounted[i].mpartitions[j].name << endl;
             }
         }
+    }
+}
+
+void Mount::unmount(vector<string> command) {
+    string id;
+    for (auto current : command) {
+        string key = shared.lower(current.substr(0, current.find("=")));
+        current.erase(0, key.length() + 1);
+
+        // SOLO PARA ELIMINAR LAS COMILLAS 
+        if (current.substr(0, 1) == "\"") {
+            current = current.substr(1, current.length() - 2);
+        }
+
+        if (shared.compare(key, "id")) {
+            id = current;
+        }
+    }
+
+    if (id.empty()) {
+        shared.handler("UNMOUNT", "EL ID ES UN PARAMETRO OBLIGATORIO");
+        return;
+    }
+
+    // ver si esta en la lista
+    auto it = find(mountedIds.begin(), mountedIds.end(), id);
+    if (it != mountedIds.end()) {
+        // sisi quitarlo de la lista de los discos montados
+        mountedIds.erase(it);
+
+        // quitarlo del array
+        for (int i = 0; i < 99; i++) {
+            for (int j = 0; j < 26; j++) {
+                string re = to_string(i + 1) + alfabeto.at(j);
+                if ("07" + re == id && mounted[i].mpartitions[j].status == '1') {
+                    mounted[i].mpartitions[j].status = '0';
+                    shared.response("UNMOUNT", "SE DESMONTO EL DISCO ---> -id=07" + re);
+                    return;
+                }
+            }
+        }
+    } else {
+        shared.handler("UNMOUNT", "ID no encontrado: " + id);
     }
 }

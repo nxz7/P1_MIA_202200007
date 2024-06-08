@@ -86,7 +86,8 @@ void scanner::functions(string token, vector<string> tks)
         disco.mkdisk(tks); 
     }else if(compare(token, "RMDISK")){
         cout << "Comando reconocido: RMDISK" << endl;
-        //disco.rmdisk(tks);
+        disco.rmdisk(tks);
+
     }else if(compare(token, "FDISK")){
         cout << "Comando reconocido: FDISK" << endl;
         disco.fdisk(tks);
@@ -95,7 +96,10 @@ void scanner::functions(string token, vector<string> tks)
         mount.mount(tks);
     }else if(compare(token, "UNMOUNT")){
         cout << "Comando reconocido: UNMOUNT" << endl;
-        //mount.unmount(tks);
+        mount.unmount(tks);
+
+
+
     }else if(compare(token, "MKFS")){
         cout << "Comando reconocido: MKFS" << endl;
         //FileSystem fileSystem = FileSystem(mount);
