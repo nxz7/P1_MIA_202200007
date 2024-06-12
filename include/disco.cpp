@@ -387,6 +387,7 @@ void Disk::fdisk(vector<string> context){
             return;
         }
         //shared.response("FDISK", "PARTICION AUMENTADA");
+        //borrarPart(_delete, path, name);
         shared.response("FDISK - delete", "comando ejecutado correctamente");
     }
 }
@@ -585,7 +586,9 @@ void Disk::generatepartition(string s, string u, string p, string t, string f, s
 
         if(shared.compare(t, "l")){
             // Aqui se crea la particion logica
+            logzz(newPartition, extended, p);
             shared.response("FDISK", "<<Particion logica>>");
+            return;
         }
 
         disco = adjust(disco, newPartition, between, particiones, used);
@@ -762,6 +765,47 @@ Disk::adjust(Structs::MBR mbr, Structs::Partition p, vector<Transition> t, vecto
     }
 }
 
+
+void Disk::logzz(Structs::Partition partition, Structs::Partition ep, string p) {
+    Structs::EBR nlogic;
+    nlogic.part_status = '1';
+    nlogic.part_fit = partition.part_fit;
+    nlogic.part_size = partition.part_size;
+    nlogic.part_next = -1;
+    strcpy(nlogic.part_name, partition.part_name);
+
+    FILE *file = fopen(p.c_str(), "rb+");
+    rewind(file);
+    Structs::EBR tmp;
+    fseek(file, ep.part_start, SEEK_SET);
+    fread(&tmp, sizeof(Structs::EBR), 1, file);
+    int size;
+    do {
+        size += sizeof(Structs::EBR) + tmp.part_size;
+        if (tmp.part_status == '0' && tmp.part_next == -1) {
+            nlogic.part_start = tmp.part_start;
+            nlogic.part_next = nlogic.part_start + nlogic.part_size + sizeof(Structs::EBR);
+            if ((ep.part_size - size) <= nlogic.part_size) {
+                throw runtime_error("no hay espacio para más particiones lógicas");
+            }
+            fseek(file, nlogic.part_start, SEEK_SET);
+            fwrite(&nlogic, sizeof(Structs::EBR), 1, file);
+            fseek(file, nlogic.part_next, SEEK_SET);
+            Structs::EBR addLogic;
+            addLogic.part_status = '0';
+            addLogic.part_next = -1;
+            addLogic.part_start = nlogic.part_next;
+            fseek(file, addLogic.part_start, SEEK_SET);
+            fwrite(&addLogic, sizeof(Structs::EBR), 1, file);
+            shared.response("FDISK", "partición creada correctamente");
+            fclose(file);
+            return;
+        }
+        fseek(file, tmp.part_next, SEEK_SET);
+        fread(&tmp, sizeof(Structs::EBR), 1, file);
+    } while (true);
+}
+
 void Disk::addpartition(string add, string u, string n, string p) {
     try {
         int i = stoi(add);
@@ -806,7 +850,7 @@ void Disk::addpartition(string add, string u, string n, string p) {
                                     partitions[i].part_size += i;
                                     break;
                                 } else {
-                                    throw runtime_error("se sobrepasa el límite(1)");
+                                    //throw runtime_error("se sobrepasa el límite(1)");
                                     shared.response("FDISK", "PARTICION AUMENTADA");
                                 }
                             }
@@ -839,4 +883,110 @@ void Disk::addpartition(string add, string u, string n, string p) {
         return;
     }
 
+}
+
+
+
+void Disk::borrarPart(string d, string p, string n) {
+    try {
+
+        if (p.substr(0, 1) == "\"") {
+            p = p.substr(1, p.length() - 2);
+        }
+
+        if (!(shared.compare(d, "fast") || shared.compare(d, "full"))) {
+            throw runtime_error("agregar los valores relacionado con DELETE --> FULL / FAST");
+        }
+
+        FILE *file = fopen(p.c_str(), "rb+");
+        //EN EL CASO DE QUE SE QUIERE ABRIR UN DISCO QUE NO ESTA O NO TIENE LA CORRECTA TERINACION .DISK
+        if (file == NULL) {
+            throw runtime_error("El disco que se indica no existe o no esta disponible");
+        }
+
+        Structs::MBR disk;
+        rewind(file);
+        fread(&disk, sizeof(Structs::MBR), 1, file);
+
+        findby(disk, n, p);
+
+        Structs::Partition partitions[4];
+        partitions[0] = disk.mbr_Partition_1;
+        partitions[1] = disk.mbr_Partition_2;
+        partitions[2] = disk.mbr_Partition_3;
+        partitions[3] = disk.mbr_Partition_4;
+
+        Structs::Partition past;
+        bool fll = false;
+        for (int i = 0; i < 4; i++) {
+            if (partitions[i].part_status == '1') {
+                if (partitions[i].part_type == 'P') {
+                    if (shared.compare(partitions[i].part_name, n)) {
+                        if (shared.compare(d, "fast")) {
+                            partitions[i].part_status = '0';
+                        } else {
+                            past = partitions[i];
+                            partitions[i] = Structs::Partition();
+                            fll = true;
+                        }
+                        break;
+                    }
+                } else {
+                    if (shared.compare(partitions[i].part_name, n)) {
+                        if (shared.compare(d, "fast")) {
+                            partitions[i].part_status = '0';
+                        } else {
+                            past = partitions[i];
+                            partitions[i] = Structs::Partition();
+                            fll = true;
+                        }
+                        break;
+                    }
+                    vector<Structs::EBR> ebrs = getlogics(partitions[i], p);
+                    int count = 0;
+                    for (Structs::EBR ebr : ebrs) {
+                        if (shared.compare(ebr.part_name, n)) {
+                            ebr.part_status = '0';
+                        }
+                        fseek(file, ebr.part_start, SEEK_SET);
+                        fwrite(&ebr, sizeof(Structs::EBR), 1, file);
+                        count++;
+                    }
+                    shared.response("FDISK", ">>>>Se elimino la particion!!!!!!!! --->" + d);
+                    return;
+                }
+            }
+        }
+
+        Structs::Partition aux;
+        for (int i = 3; i >= 0; i--) {
+            for (int j = 0; j < i; j++) {
+                if (partitions[j].part_status == '0') {
+                    aux = partitions[j];
+                    partitions[j] = partitions[j + 1];
+                    partitions[j + 1] = aux;
+                }
+            }
+        }
+
+        disk.mbr_Partition_1 = partitions[0];
+        disk.mbr_Partition_2 = partitions[1];
+        disk.mbr_Partition_3 = partitions[2];
+        disk.mbr_Partition_4 = partitions[3];
+
+        rewind(file);
+        fwrite(&disk, sizeof(Structs::MBR), 1, file);
+        if (fll) {
+            fseek(file, past.part_start, SEEK_SET);
+            int num = static_cast<int>(past.part_size / 2);
+            fwrite("\0", sizeof("\0"), num, file);
+        }
+        shared.response("FDISK", ">>>>Se elimino la particion!!!!!!!! --->" + d);
+        fclose(file);
+    }
+    catch (exception &e) {
+        //error de cualquier tipo, que no pare ->>>>>>>>> try catchhhh
+        shared.handler("FDISK", e.what());
+        return;
+    }
 }
