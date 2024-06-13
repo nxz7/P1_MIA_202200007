@@ -9,33 +9,24 @@ using namespace std;
 
 Mount::Mount(){}
 
-void Mount::mount(vector<string> command){
-    
-    //SOLO PARA LISTA LOS QUE ESTAN MONTADOS
-    if(command.empty()){
-        discosMontado();
+void Mount::mount(vector<string> context) {
+    if (context.empty()) {
+        listmount();
         return;
     }
-
-    vector<string> required = { "path", "name" }; //SON OBLIGATORIOS
+    vector<string> required = {"name", "path"};
     string path;
     string name;
 
-    for (auto current : command){ 
-
-        string id = shared.lower(current.substr(0, current.find("=")));
+    for (auto current : context) {
+        string id = shared.lower(current.substr(0, current.find('=')));
         current.erase(0, id.length() + 1);
+        if (current.substr(0, 1) == "\"") {
+            current = current.substr(1, current.length() - 2);
+        }
 
-
-        //SOLO PARA ELIMINAR LAS COMILLAS 
-        if(current.substr(0,1) == "\""){
-            current.substr(1,current.length()-2);
-        };
-//--------------------
-//ORDENAR LOS DOS DATOS OBLIGATORIOS
-
-        if(shared.compare(id, "name")){
-            if(count(required.begin(), required.end(), id)){
+        if (shared.compare(id, "name")) {
+            if (count(required.begin(), required.end(), id)) {
                 auto itr = find(required.begin(), required.end(), id);
                 required.erase(itr);
                 name = current;
@@ -47,67 +38,52 @@ void Mount::mount(vector<string> command){
                 path = current;
             }
         }
-    };
+    }
     if (required.size() != 0) {
-        shared.handler("MOUNT", "EL NOMBRE Y EL PATH SON PARAMETROS OBLIGATORIOS");
+        shared.handler("MOUNT", "requiere ciertos parámetros obligatorios");
         return;
-    };
+    }
     mount(path, name);
 }
 
-
-//mount abrir (validar) >> estructura/asignar
-
-void Mount::mount(string p, string n){
-    try{
-        //VALIDAR QUE LO QUE SE QUIERA MONTAR EXISTE - (solo intentar abrir)
+void Mount::mount(string p, string n) {
+    try {
         FILE *validate = fopen(p.c_str(), "r");
         if (validate == NULL) {
-            shared.handler("MOUNT", "ESTE DISCO NO EXISTE -- REVISAR");
+            throw runtime_error("disco no existente");
         }
 
-//se manda a llamar 
         Structs::MBR disk;
         rewind(validate);
         fread(&disk, sizeof(Structs::MBR), 1, validate);
         fclose(validate);
-        
 
-        //se mira si es una extendida, si esta vadia e monta una logica
         Structs::Partition partition = dsk.findby(disk, n, p);
         if (partition.part_type == 'E') {
             vector<Structs::EBR> ebrs = dsk.getlogics(partition, p);
             if (!ebrs.empty()) {
                 Structs::EBR ebr = ebrs.at(0);
                 n = ebr.part_name;
-
-                //agregar logica
-                shared.handler("", "se montará una partición lógica(esta dentro de una extendida)");
+                //shared.handler("", "se montará una partición lógica");
             } else {
-                throw runtime_error("No se puede montar una extendida");
+                throw runtime_error("no se puede montar una extendida");
             }
         }
 
-//se recorre los montados, si esta es que ya esta
         for (int i = 0; i < 99; i++) {
             if (mounted[i].path == p) {
                 for (int j = 0; j < 26; j++) {
                     if (Mount::mounted[i].mpartitions[j].status == '0') {
-                        //ESTABLECER LA MANERA EN LA QUE SE PIDE #id=07Disco1
                         mounted[i].mpartitions[j].status = '1';
-                        mounted[i].mpartitions[j].letter = simbolos.at(j);
+                        mounted[i].mpartitions[j].letter = alfabeto.at(j);
                         strcpy(mounted[i].mpartitions[j].name, n.c_str());
-                        string re = to_string(i + 1) + simbolos.at(j);
-                        //lista
-                        mountedIds.push_back("07" + re);
-
-                        shared.response("MOUNT", "SE MONTO EL DISCO ---> -id=07" + re);
+                        string re = to_string(i + 1) + alfabeto.at(j);
+                        shared.response("MOUNT", "se ha realizado correctamente el mount -id=07" + re);
                         return;
                     }
                 }
             }
         }
-
         for (int i = 0; i < 99; i++) {
             if (mounted[i].status == '0') {
                 mounted[i].status = '1';
@@ -115,75 +91,124 @@ void Mount::mount(string p, string n){
                 for (int j = 0; j < 26; j++) {
                     if (Mount::mounted[i].mpartitions[j].status == '0') {
                         mounted[i].mpartitions[j].status = '1';
-                        mounted[i].mpartitions[j].letter = simbolos.at(j);
+                        mounted[i].mpartitions[j].letter = alfabeto.at(j);
                         strcpy(mounted[i].mpartitions[j].name, n.c_str());
-                        string re = to_string(i + 1) + simbolos.at(j);
-                        mountedIds.push_back("07" + re);
-                        shared.response("MOUNT", "SE MONTO EL DISCO ---> -id=07" + re);
+                        string re = to_string(i + 1) + alfabeto.at(j);
+                        shared.response("MOUNT", "se ha realizado correctamente el mount -id=07" + re);
                         return;
                     }
                 }
             }
         }
-
-    }catch(exception &e){
+    }
+    catch (exception &e) {
         shared.handler("MOUNT", e.what());
         return;
     }
-
 }
 
-void Mount::discosMontado() {
-    cout << "\n<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<MONTADOS>>>>>>>>>>>>>>>>>>>>>>>>>>>" << endl;
-        cout << "\n<<<< id >>>>  - <<<< nombre >>>>" << endl;
-    for (int i = 0; i < 99; i++) {
-        for (int j = 0; j < 26; j++) {
-            if (mounted[i].mpartitions[j].status == '1') {
-                cout << "> 07" << i + 1 << simbolos.at(j) << "disco - " << mounted[i].mpartitions[j].name << endl;
-            }
+void Mount::unmount(vector<string> context) {
+    vector<string> required = {"id"};
+    string id_;
+
+    for (int i = 0; i < context.size(); i++) {
+        string current = context.at(i);
+        string id = current.substr(0, current.find("="));
+        current.erase(0, id.length() + 1);
+
+        if (shared.compare(id, "id")) {
+            auto itr = find(required.begin(), required.end(), id);
+            required.erase(itr);
+            id_ = current;
         }
     }
-}
-
-void Mount::unmount(vector<string> command) {
-    string id;
-    for (auto current : command) {
-        string key = shared.lower(current.substr(0, current.find("=")));
-        current.erase(0, key.length() + 1);
-
-        // SOLO PARA ELIMINAR LAS COMILLAS 
-        if (current.substr(0, 1) == "\"") {
-            current = current.substr(1, current.length() - 2);
-        }
-
-        if (shared.compare(key, "id")) {
-            id = current;
-        }
-    }
-
-    if (id.empty()) {
-        shared.handler("UNMOUNT", "EL ID ES UN PARAMETRO OBLIGATORIO");
+    if (required.size() != 0) {
+        shared.handler("UNMOUNT", "requiere ciertos parámetros obligatorios");
         return;
     }
+    unmount(id_);
+}
 
-    // ver si esta en la lista
-    auto it = find(mountedIds.begin(), mountedIds.end(), id);
-    if (it != mountedIds.end()) {
-        // sisi quitarlo de la lista de los discos montados
-        mountedIds.erase(it);
+void Mount::unmount(string id) {
+    try {
+        if (!(id[0] == '0' && id[1] == '7')) {
+            throw runtime_error("el primer identificador no es válido");
+        }
+        string past = id;
+        char letter = id[id.length() - 1];
+        id.erase(0, 2);
+        id.pop_back();
+        int i = stoi(id) - 1;
+        if (i < 0) {
+            throw runtime_error("identificador de disco inválido");
+        }
 
-        // quitarlo del array
-        for (int i = 0; i < 99; i++) {
-            for (int j = 0; j < 26; j++) {
-                string re = to_string(i + 1) + simbolos.at(j);
-                if ("07" + re == id && mounted[i].mpartitions[j].status == '1') {
-                    mounted[i].mpartitions[j].status = '0';
-                    shared.response("UNMOUNT", "SE DESMONTO EL DISCO ---> -id=07" + re);
+        for (int j = 0; j < 26; j++) {
+            if (mounted[i].mpartitions[j].status == '1') {
+                if (mounted[i].mpartitions[j].letter == letter) {
+
+                    MountedPartition mp = MountedPartition();
+                    mounted[i].mpartitions[j] = mp;
+                    shared.response("UNMOUNT", "se ha realizado correctamente el unmount -id=" + past);
                     return;
                 }
             }
         }
-    } else {
-        shared.handler("UNMOUNT", "ID no encontrado: " + id);
+        throw runtime_error("id no existente, no se desmontó nada");
+    }
+    catch (invalid_argument &e) {
+        shared.handler("UNMOUNT", "identificador de disco incorrecto, debe ser entero");
+        return;
+    }
+    catch (exception &e) {
+        shared.handler("UNMOUNT", e.what());
+        return;
+    }
+}
+
+Structs::Partition Mount::getmount(string id, string *p) {
+
+    if (!(id[0] == '0' && id[1] == '7')) {
+        throw runtime_error("el primer identificador no es válido");
+    }
+    string past = id;
+    char letter = id[id.length() - 1];
+    id.erase(0, 2);
+    id.pop_back();
+    int i = stoi(id) - 1;
+    if (i < 0) {
+        throw runtime_error("identificador de disco inválido");
+    }
+
+    for (int j = 0; j < 26; j++) {
+        if (mounted[i].mpartitions[j].status == '1') {
+            if (mounted[i].mpartitions[j].letter == letter) {
+
+                FILE *validate = fopen(mounted[i].path, "r");
+                if (validate == NULL) {
+                    throw runtime_error("disco no existente");
+                }
+
+                Structs::MBR disk;
+                rewind(validate);
+                fread(&disk, sizeof(Structs::MBR), 1, validate);
+                fclose(validate);
+                *p = mounted[i].path;
+                return dsk.findby(disk, mounted[i].mpartitions[j].name, mounted[i].path);
+            }
+        }
+    }
+    throw runtime_error("partición no existente");
+}
+
+void Mount::listmount() {
+    cout << "\n<-------------------------- MOUNTS -------------------------->"
+         << endl;
+    for (int i = 0; i < 99; i++) {
+        for (int j = 0; j < 26; j++) {
+            if (mounted[i].mpartitions[j].status == '1') {
+                cout << "> 07" << i + 1 << alfabeto.at(j) << ", " << mounted[i].mpartitions[j].name << endl;
+            }
+        }
     }
 }

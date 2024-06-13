@@ -23,7 +23,7 @@ public:
     //rsp
     void respuesta(string operacion, string mensaje);
     //excute la que se llama al reconocer
-    void runExecute(vector<string> tokens);
+    void funcion_excec(vector<string> tokens);
     //llama esta
     void excec(string path);
     //confirmar si seguir 

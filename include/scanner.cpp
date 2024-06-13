@@ -1,6 +1,8 @@
 #include "../lib/scanner.h"
 #include "../lib/disco.h"
 #include "../lib/mount.h"
+#include "../lib/filemanager.h"
+#include "../lib/repz.h"
 
 #include <iostream>
 #include <stdlib.h>
@@ -13,8 +15,9 @@
 using namespace std;
 
 Disk disco;
-
+Report report;
 Mount mount;
+FileManager filemanager;
 
 bool logued = false;
 scanner::scanner()
@@ -48,7 +51,7 @@ void scanner::start()
             functions(par, parametros);
             cout << "\n >>>>continuar ? (enter)" << endl;
             getline(cin,texto);
-            Clear();
+            //Clear();
             cout << ">>>>>>>>>>>>>>>>> PROYECTO 1 \n" << endl;
             cout << ">>>>>>>>>>>>>>>>> NATALIA MARIEL CALDERON ECHEVERRIA \n" << endl;
             cout << ">>>>>>>>>>>>>>>>>202200007 \n" << endl;
@@ -63,6 +66,7 @@ void scanner::start()
 
 void scanner::functions(string rec, vector<string> parametros)
 {
+    
     if (compare(rec, "MKDISK"))
     {
         //cout << "Comando reconocido: " << endl;
@@ -139,11 +143,12 @@ void scanner::functions(string rec, vector<string> parametros)
         cout << "Comando reconocido: REPORTES" << endl;
         //generar los dos reportes principaes <--------------------
         //mbr y disk
+        report.generar(parametros, mount);
 
 
     }else if(compare(rec, "EXEC")){
         cout << "Comando reconocido: EXEC" << endl;
-        runExecute(parametros);
+        funcion_excec(parametros);
 
     }else if(compare(rec.substr(0,1),"#")){
         respuesta(">>>> COMENTARIO RECONOCIDO :) ",rec);
@@ -293,20 +298,20 @@ bool scanner::confirmar(string mensaje){
     
 }
 
-void scanner::runExecute(vector<string> tokens){
+void scanner::funcion_excec(vector<string> tokens){
     string path = "";
-    for (string rec:tokens)
+    for (string token:tokens)
     {
-        string par = rec.substr(0, rec.find("="));
-        rec.erase(0,par.length()+1);
-        if (compare(par, "path"))
+        string tk = token.substr(0, token.find("="));
+        token.erase(0,tk.length()+1);
+        if (compare(tk, "path"))
         {
-            path = rec;
+            path = token;
         }
     }
     if (path.empty())
     {
-        errores("EXEC","el path es un dato obligatorio, agregar");
+        errores("EXEC","Se requiere path para este comando");
         return;
     }
     excec(path);
@@ -314,29 +319,29 @@ void scanner::runExecute(vector<string> tokens){
 
 void scanner::excec(string path){
     string filename(path);
-    vector <string> flz;
+    vector <string> lines;
     string line;
     ifstream input_file(filename);
     if(!input_file.is_open()){
-        cerr << "no se pudo ejecutar el comando, debido al archivo" << filename << endl;
+        cerr << "No se puede abrir el archivo" << filename << endl;
         return;
     }
     while(getline(input_file,line)){
-       flz.push_back(line);
+        lines.push_back(line);
     }
-    for(const auto &i:flz){
+    for(const auto &i:lines){
         string texto = i;
-        string par = rec(texto);
+        string tk = rec(texto);
         if(texto!=""){
             if(compare(texto,"PAUSE")){
                 string pause;
-                respuesta("PAUSE","desea continuar? (enter)");
+                respuesta("PAUSE","Presione enter para continuar...");
                 getline(cin,pause);
                 continue;
             }
-            texto.erase(0,par.length()+1);
-            vector <string> parametros = recAgrupar_tokens(texto);
-            functions(par,parametros);
+            texto.erase(0,tk.length()+1);
+            vector <string> tks = recAgrupar_tokens(texto);
+            functions(tk,tks);
         }
     }
     input_file.close();

@@ -9,48 +9,42 @@
 
 using namespace std;
 
-class Mount
-{
+class Mount {
     public:
     Mount();
+
     typedef struct _MP
     {
         char letter;
         char status = '0';
-        char name[16]; //como se definio antes < 16
+        char name[20];
+    }MountedPartition;
 
-    }MountedPartition; //l aparticion
-
-    typedef struct _MD{
+    typedef struct _MD
+    {
         char path[150];
         char status = '0';
         MountedPartition mpartitions[26];
-    }MountedDisk; //el disco MONTADO
+    }MountedDisc;
 
-    MountedDisk mounted[99];
-//MONTAR Y DESMONTAR
+    MountedDisc mounted[99];
 
-    void mount(vector<string> command);
-    void unmount(vector<string> command); //este es el que se esta usando, pasa el commando id
-    void mount(string path, string name);
-    void unmount(string id);  //RECIBE SOLO EL ID
+    void mount(vector<string> context);
 
+    void unmount(vector<string> context);
 
-    void discosMontado(); //LISTA DE LOS MONTADOS
+    void mount(string p, string n);
 
-    Structs::Partition getMount(string id, string *p);
+    void unmount(string id);
+
+    void listmount();
+
+    Structs::Partition getmount(string id, string *p);
 
     private:
     Disk dsk;
     Shared shared;
-    vector<char> simbolos = {
-            'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p',
-            'q','r','s','t','u','v','w','x','y','z',
-            '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'};
-    vector<string> mountedIds;
-
+    vector<char> alfabeto = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r',
+                             's', 't', 'u', 'v', 'w', 'x', 'y', 'z'};
 };
-
-
-
 #endif

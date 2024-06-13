@@ -28,7 +28,7 @@ void Disk::mkdisk(vector<string> tokens){
     for(string rec:tokens){
         string par = rec.substr(0, rec.find("=")); // -f=b
         rec.erase(0,par.length()+1); // b
-        if(scan.compare(par, "f")){
+        if(scan.compare(par, "F")){
             if(f.empty()){
                 //F ES OPCIONAL -> BEST, WORST, FIRST --> SI NO SE TOMA EL 1
                 f = rec; // f = b
@@ -81,6 +81,8 @@ void Disk::mkdisk(vector<string> tokens){
         //unidad en el caso de que no hay, MEGA
     }
 //COMPROBASION DEL COMANDO, los obligatorios y los opcionales
+    std::string upper_u = scan.upper(u);
+    
     if (path.empty() && size.empty())
     {
         scan.errores("MKDISK", "OBLIGATORIO: Path y Size ");
@@ -92,8 +94,10 @@ void Disk::mkdisk(vector<string> tokens){
     }else if (!scan.compare(f,"BF") && !scan.compare(f,"FF") && !scan.compare(f,"WF"))
     {
         scan.errores("MKDISK","valores F, no valido(valido: BF, FF, WF)");
-    }else if (!scan.compare(u,"k") && !scan.compare(u,"m"))
+
+    }else if (upper_u != "K" && upper_u != "M")
     {
+        cout << upper_u <<endl;
         scan.errores("MKDISK","valores U, no valido(valido: k y m) ");
     }else{
         //LLAMA LA FUNCION
@@ -254,6 +258,14 @@ void Disk::rmdisk(vector<string> tokens) {
         path = path.substr(1, path.length() - 2);
     }
 
+    char confirmation;
+    std::cout << "seguro que quiere borrar la el disco? (s/n): ";
+    std::cin >> confirmation;
+    if (confirmation != 's' && confirmation != 'S') {
+        std::cout << "Entendido, la particion no se borrara" << std::endl;
+        return;
+    }
+
     // ver si existe
     FILE *file = fopen(path.c_str(), "r");
     if (file != NULL) {
@@ -349,7 +361,7 @@ void Disk::fdisk(vector<string> context){
 
     } else {
         vector<string> required = {"path", "name", "delete"};
-        string _delete;
+        string infobrr;
         string path;
         string name;
 
@@ -378,7 +390,7 @@ void Disk::fdisk(vector<string> context){
 
                     auto itr = find(required.begin(), required.end(), id);
                     required.erase(itr);
-                    _delete = current;
+                    infobrr = current;
                 }
             }
         }
@@ -387,7 +399,7 @@ void Disk::fdisk(vector<string> context){
             return;
         }
         //shared.response("FDISK", "PARTICION AUMENTADA");
-        //borrarPart(_delete, path, name);
+        borrarPart(infobrr, path, name);
         shared.response("FDISK - delete", "comando ejecutado correctamente");
     }
 }
@@ -555,7 +567,7 @@ void Disk::generatepartition(string s, string u, string p, string t, string f, s
             if(used == 4 && !(shared.compare(t, "l"))){
                 shared.handler("FDISK", "Particiones: 4 - NO SE PUEDEN CREAR MAS PARTICIONES PRIMARIAS");
                 return;
-            }else if(ext==1 && !(shared.compare(t, "e"))){
+            }else if(ext==1 && shared.compare(t, "e")){
                 shared.handler("FDISK", "--- NO SE PUEDEN CREAR MAS PARTICIONES EXTENDIDAS, ya hay 1");
                 return;
             }
@@ -902,6 +914,17 @@ void Disk::borrarPart(string d, string p, string n) {
         //EN EL CASO DE QUE SE QUIERE ABRIR UN DISCO QUE NO ESTA O NO TIENE LA CORRECTA TERINACION .DISK
         if (file == NULL) {
             throw runtime_error("El disco que se indica no existe o no esta disponible");
+        }
+
+
+        //confirmacion
+
+        char confirmation;
+        std::cout << "seguro que quiere borrar la particion " << n << "? (s/n): ";
+        std::cin >> confirmation;
+        if (confirmation != 's' && confirmation != 'S') {
+            std::cout << "Entendido, la particion no se borrara" << std::endl;
+            return;
         }
 
         Structs::MBR disk;
