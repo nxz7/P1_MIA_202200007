@@ -12,7 +12,7 @@ using namespace std;
 class Mount {
     public:
     Mount();
-
+//-----------------partes fijas
     typedef struct _MP
     {
         char letter;
@@ -28,23 +28,27 @@ class Mount {
     }MountedDisc;
 
     MountedDisc mounted[99];
-
-    void mount(vector<string> context);
-
-    void unmount(vector<string> context);
+//------------------------------------montar 1 y 2
+    void mount(vector<string> textzz);
 
     void mount(string p, string n);
+//------------------------------------desmontar 1 y 2
+
+    void unmount(vector<string> textzz);
 
     void unmount(string id);
 
-    void listmount();
+//-----------------------------------lista para ver las partdiscos montados
 
+    void lstMontados();
+//------------------------------ buscar y devolver --> uso REP
     Structs::Partition getmount(string id, string *p);
 
     private:
     Disk dsk;
     Shared shared;
-    vector<char> alfabeto = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r',
-                             's', 't', 'u', 'v', 'w', 'x', 'y', 'z'};
+    //LETRA PARA LOS ID, EMPIAZA CON A 
+    vector<char> letraMount = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r',
+                             's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'};
 };
 #endif

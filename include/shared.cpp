@@ -35,7 +35,7 @@ string Shared::lower(string s)
     return u;
 }
 
-bool Shared::compare(string s1, string s2)
+bool Shared::equiv(string s1, string s2)
 {
     s1 = upper(s1);
     s2 = upper(s2);
@@ -48,7 +48,7 @@ bool Shared::compare(string s1, string s2)
 
 
 //para que tire los errores
-void Shared::handler(string title, string message)
+void Shared::notif(string title, string message)
 {
     cout << "\033[1;31m Error: \033"
         << "\033[0;31m(" + title + ")~> \033[0m"
@@ -64,14 +64,14 @@ bool Shared::confirmation(string title, string message)
         << "¿" + message + "? Y/N : ";
     string action;
     getline(cin, action);
-    if (compare(action, "y") || compare(action, "yes"))
+    if (equiv(action, "y") || equiv(action, "yes"))
     {
         return true;
     }
     return false;
 }
 
-void Shared::response(string title, string message)
+void Shared::msmSalida(string title, string message)
 {
     cout << "\033[0;32m (" + title + "): \033[0m"
         << message << endl;

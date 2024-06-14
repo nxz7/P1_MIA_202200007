@@ -9,29 +9,32 @@ using namespace std;
 
 Mount::Mount(){}
 
-void Mount::mount(vector<string> context) {
-    if (context.empty()) {
-        listmount();
+//se monta la particion, tiene que llevar nombre y path
+//---> mount 1 (ver requisitos)--> mount (montar si si trae)2 
+//-------------------------------------------montar
+void Mount::mount(vector<string> textzz) {
+    if (textzz.empty()) {
+        lstMontados();
         return;
     }
     vector<string> required = {"name", "path"};
     string path;
     string name;
-
-    for (auto current : context) {
+//name y path son pbligatorios
+    for (auto current : textzz) {
         string id = shared.lower(current.substr(0, current.find('=')));
         current.erase(0, id.length() + 1);
         if (current.substr(0, 1) == "\"") {
             current = current.substr(1, current.length() - 2);
         }
 
-        if (shared.compare(id, "name")) {
+        if (shared.equiv(id, "name")) {
             if (count(required.begin(), required.end(), id)) {
                 auto itr = find(required.begin(), required.end(), id);
                 required.erase(itr);
                 name = current;
             }
-        } else if (shared.compare(id, "path")) {
+        } else if (shared.equiv(id, "path")) {
             if (count(required.begin(), required.end(), id)) {
                 auto itr = find(required.begin(), required.end(), id);
                 required.erase(itr);
@@ -40,17 +43,19 @@ void Mount::mount(vector<string> context) {
         }
     }
     if (required.size() != 0) {
-        shared.handler("MOUNT", "requiere ciertos parámetros obligatorios");
+        shared.notif("MOUNT", "no se encuentran todos los parametros obligatorio para realizar el mount");
         return;
     }
+    //si si tiene los parametros ya se intenta montar
     mount(path, name);
 }
 
 void Mount::mount(string p, string n) {
+    //path y name, en un try catch para que no se caiga
     try {
         FILE *validate = fopen(p.c_str(), "r");
         if (validate == NULL) {
-            throw runtime_error("disco no existente");
+            throw runtime_error("el id no existe o no es valido, revisar!");
         }
 
         Structs::MBR disk;
@@ -64,9 +69,9 @@ void Mount::mount(string p, string n) {
             if (!ebrs.empty()) {
                 Structs::EBR ebr = ebrs.at(0);
                 n = ebr.part_name;
-                //shared.handler("", "se montará una partición lógica");
+                //se mira lo de la part logca --> ya agregada
             } else {
-                throw runtime_error("no se puede montar una extendida");
+                throw runtime_error("es imposible realizar un mount sobre una particion extendida, revisar!!");
             }
         }
 
@@ -75,10 +80,10 @@ void Mount::mount(string p, string n) {
                 for (int j = 0; j < 26; j++) {
                     if (Mount::mounted[i].mpartitions[j].status == '0') {
                         mounted[i].mpartitions[j].status = '1';
-                        mounted[i].mpartitions[j].letter = alfabeto.at(j);
+                        mounted[i].mpartitions[j].letter = letraMount.at(j);
                         strcpy(mounted[i].mpartitions[j].name, n.c_str());
-                        string re = to_string(i + 1) + alfabeto.at(j);
-                        shared.response("MOUNT", "se ha realizado correctamente el mount -id=07" + re);
+                        string re = to_string(i + 1) + letraMount.at(j);
+                        shared.msmSalida("MOUNT", ">> se ha realizado el mount !!! >> -id=07" + re);
                         return;
                     }
                 }
@@ -91,10 +96,10 @@ void Mount::mount(string p, string n) {
                 for (int j = 0; j < 26; j++) {
                     if (Mount::mounted[i].mpartitions[j].status == '0') {
                         mounted[i].mpartitions[j].status = '1';
-                        mounted[i].mpartitions[j].letter = alfabeto.at(j);
+                        mounted[i].mpartitions[j].letter = letraMount.at(j);
                         strcpy(mounted[i].mpartitions[j].name, n.c_str());
-                        string re = to_string(i + 1) + alfabeto.at(j);
-                        shared.response("MOUNT", "se ha realizado correctamente el mount -id=07" + re);
+                        string re = to_string(i + 1) + letraMount.at(j);
+                        shared.msmSalida("MOUNT", ">> se ha realizado el mount !!! >> -id=07" + re);
                         return;
                     }
                 }
@@ -102,37 +107,56 @@ void Mount::mount(string p, string n) {
         }
     }
     catch (exception &e) {
-        shared.handler("MOUNT", e.what());
+        shared.notif("MOUNT", e.what());
         return;
     }
 }
 
-void Mount::unmount(vector<string> context) {
+//para desmontar se necesita lo solo el id, revisa si lo trae
+//UNMOUNT1(REVISAR PARAMETROS)--> UNMOUNT2(DESMONTA EN SERIO)
+void Mount::unmount(vector<string> textzz) {
     vector<string> required = {"id"};
-    string id_;
+    string idDesMontar;
 
-    for (int i = 0; i < context.size(); i++) {
-        string current = context.at(i);
+    for (int i = 0; i < textzz.size(); i++) {
+        string current = textzz.at(i);
         string id = current.substr(0, current.find("="));
         current.erase(0, id.length() + 1);
 
-        if (shared.compare(id, "id")) {
+        if (shared.equiv(id, "id")) {
             auto itr = find(required.begin(), required.end(), id);
             required.erase(itr);
-            id_ = current;
+            idDesMontar = current;
         }
     }
     if (required.size() != 0) {
-        shared.handler("UNMOUNT", "requiere ciertos parámetros obligatorios");
+        shared.notif("UNMOUNT", "no se encuentran todos los parametros obligatorio para realizar el unmount");
         return;
     }
-    unmount(id_);
+    unmount(idDesMontar);
+}
+//----------------------------------listas
+void Mount::lstMontados() {
+
+    cout << "\n<<<<<<<<<<<<<<<<<<<<<<LISTA DE MONTADOS >>>>>>>>>>>>>>>>>>>>>>"
+         << endl;
+    for (int i = 0; i < 99; i++) {
+        for (int j = 0; j < 26; j++) {
+            if (mounted[i].mpartitions[j].status == '1') {
+                cout << "> 07" << i + 1 << letraMount.at(j) << "----- " << mounted[i].mpartitions[j].name << endl;
+            }
+        }
+    }
 }
 
+
+
+//----------------------------------desmontar
 void Mount::unmount(string id) {
     try {
+        //fijo debe empezar por el 07, si no de una no existe
         if (!(id[0] == '0' && id[1] == '7')) {
-            throw runtime_error("el primer identificador no es válido");
+            throw runtime_error("El id no es correcto, el error se encuentra en los 2 primeros numeros");
         }
         string past = id;
         char letter = id[id.length() - 1];
@@ -140,7 +164,7 @@ void Mount::unmount(string id) {
         id.pop_back();
         int i = stoi(id) - 1;
         if (i < 0) {
-            throw runtime_error("identificador de disco inválido");
+            throw runtime_error("el id no existe o no es valido, revisar!");
         }
 
         for (int j = 0; j < 26; j++) {
@@ -149,19 +173,20 @@ void Mount::unmount(string id) {
 
                     MountedPartition mp = MountedPartition();
                     mounted[i].mpartitions[j] = mp;
-                    shared.response("UNMOUNT", "se ha realizado correctamente el unmount -id=" + past);
+                    shared.msmSalida("UNMOUNT", ">> se ha realizado el unmount !!! >> -id=" + past);
                     return;
                 }
             }
         }
-        throw runtime_error("id no existente, no se desmontó nada");
+        throw runtime_error("el id indicado no existe o no esta disponible, no se pudo desmontar --> unable to unmount");
     }
     catch (invalid_argument &e) {
-        shared.handler("UNMOUNT", "identificador de disco incorrecto, debe ser entero");
+        //revisa si el id es valido, entero
+        shared.notif("UNMOUNT", "el id del disco no es correcto, no se encuentra o no es valido, revisar!");
         return;
     }
     catch (exception &e) {
-        shared.handler("UNMOUNT", e.what());
+        shared.notif("UNMOUNT", e.what());
         return;
     }
 }
@@ -169,7 +194,7 @@ void Mount::unmount(string id) {
 Structs::Partition Mount::getmount(string id, string *p) {
 
     if (!(id[0] == '0' && id[1] == '7')) {
-        throw runtime_error("el primer identificador no es válido");
+        throw runtime_error("El id no es correcto, el error se encuentra en los 2 primeros numeros");
     }
     string past = id;
     char letter = id[id.length() - 1];
@@ -177,7 +202,7 @@ Structs::Partition Mount::getmount(string id, string *p) {
     id.pop_back();
     int i = stoi(id) - 1;
     if (i < 0) {
-        throw runtime_error("identificador de disco inválido");
+        throw runtime_error("el id no existe o no es valido, revisar!");
     }
 
     for (int j = 0; j < 26; j++) {
@@ -186,7 +211,8 @@ Structs::Partition Mount::getmount(string id, string *p) {
 
                 FILE *validate = fopen(mounted[i].path, "r");
                 if (validate == NULL) {
-                    throw runtime_error("disco no existente");
+                    //en caso de que no lo pueda abrir
+                    throw runtime_error("el disco al que hace referencia no existe o no esta disponible, revisar!");
                 }
 
                 Structs::MBR disk;
@@ -198,17 +224,5 @@ Structs::Partition Mount::getmount(string id, string *p) {
             }
         }
     }
-    throw runtime_error("partición no existente");
-}
-
-void Mount::listmount() {
-    cout << "\n<-------------------------- MOUNTS -------------------------->"
-         << endl;
-    for (int i = 0; i < 99; i++) {
-        for (int j = 0; j < 26; j++) {
-            if (mounted[i].mpartitions[j].status == '1') {
-                cout << "> 07" << i + 1 << alfabeto.at(j) << ", " << mounted[i].mpartitions[j].name << endl;
-            }
-        }
-    }
+    throw runtime_error("la particion a la que hace referencia no existe o no esta disponible, revisar!");
 }

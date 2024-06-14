@@ -23,18 +23,18 @@ class Disk{
             int after;
         } Transition;
 
-//FUNCIONES PARA LOS DISCOS (DEFINICR EN .CPP)
+//------------------------------------------UNCIONES PARA LOS DISCOS (DEFINICR EN .CPP)
 
-//MKDISK
+//------------------------------------------MKDISK
         void mkdisk(vector<string> tokens); //SEPARAR LOS DATOS
-//CREAR EL DISCO
+//------------------------------------------CREAR EL DISCO
         void makeDisk(string s, string f, string u, string p);
 
-//ELIMINAR
-        void rmdisk(vector<string> context);
+//------------------------------------------ELIMINAR
+        void rmdisk(vector<string> textzz);
 
         //funciones - particiones
-        void fdisk(vector<string> context);
+        void fdisk(vector<string> textzz);
         void generatepartition(string s, string u, string p, string t, string f, string n, string a);
         
         void borrarPart(string d, string p, string n);
@@ -43,12 +43,12 @@ class Disk{
         vector<Structs::Partition> getPartitions(Structs::MBR disk);
 
         Structs::MBR
-        //recibe la info
+        //------------------------------------------recibe la info
         adjust(Structs::MBR mbr, Structs::Partition p, vector<Transition> t, vector<Structs::Partition> ps, int u);
 
         Structs::Partition findby(Structs::MBR mbr, string name, string path);
 
-//particion logica --> logicas dentro de las extendidas. Si se elimina extendida se elimina la logica
+//---particion logica --> logicas dentro de las extendidas. Si se elimina extendida se elimina la logica
 
         void logzz(Structs::Partition partition, Structs::Partition ep, string p);
 

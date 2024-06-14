@@ -1,7 +1,6 @@
 #include "../lib/scanner.h"
 #include "../lib/disco.h"
 #include "../lib/mount.h"
-#include "../lib/filemanager.h"
 #include "../lib/repz.h"
 
 #include <iostream>
@@ -17,7 +16,6 @@ using namespace std;
 Disk disco;
 Report report;
 Mount mount;
-FileManager filemanager;
 
 bool logued = false;
 scanner::scanner()
@@ -40,8 +38,8 @@ void scanner::start()
         {
             string texto;
             getline(cin, texto);
-            Clear();
-            if (compare(texto, "exit"))
+            //Clear();
+            if (equiv(texto, "exit"))
             {
                 break;
             }
@@ -67,7 +65,7 @@ void scanner::start()
 void scanner::functions(string rec, vector<string> parametros)
 {
     
-    if (compare(rec, "MKDISK"))
+    if (equiv(rec, "MKDISK"))
     {
         //cout << "Comando reconocido: " << endl;
         cout << "Comando reconocido: MKDISK" << endl;
@@ -81,76 +79,76 @@ void scanner::functions(string rec, vector<string> parametros)
         }
 
         disco.mkdisk(parametros); 
-    }else if(compare(rec, "RMDISK")){
+    }else if(equiv(rec, "RMDISK")){
         cout << "Comando reconocido: RMDISK" << endl;
         disco.rmdisk(parametros);
 
-    }else if(compare(rec, "FDISK")){
+    }else if(equiv(rec, "FDISK")){
         cout << "Comando reconocido: FDISK" << endl;
         disco.fdisk(parametros);
 
-    }else if(compare(rec, "MOUNT")){
+    }else if(equiv(rec, "MOUNT")){
         cout << "Comando reconocido: MOUNT" << endl;
         mount.mount(parametros);
 
-    }else if(compare(rec, "UNMOUNT")){
+    }else if(equiv(rec, "UNMOUNT")){
         cout << "Comando reconocido: UNMOUNT" << endl;
         mount.unmount(parametros);
 
 
 
-    }else if(compare(rec, "MKFS")){
+    }else if(equiv(rec, "MKFS")){
         cout << "Comando reconocido: MKFS" << endl;
 
 
-    }else if(compare(rec, "LOGIN")){
+    }else if(equiv(rec, "LOGIN")){
 
         cout << "Comando reconocido: LOGIN" << endl;
         cout << "------> iniciando sesion" << endl;
 
 
-    }else if(compare(rec, "LOGOUT")){
+    }else if(equiv(rec, "LOGOUT")){
 
         cout << "Comando reconocido: LOGOUT" << endl;
         cout << "------> cerrando sesion" << endl;
 
 
-    }else if(compare(rec, "MKGRP")){
+    }else if(equiv(rec, "MKGRP")){
 
         cout << "Comando reconocido:  MKGRP" << endl;
 
 
-    }else if(compare(rec, "RMGRP")){
+    }else if(equiv(rec, "RMGRP")){
 
         cout << "Comando reconocido: RMGRP" << endl;
 
 
-    }else if(compare(rec, "MKUSR")){
+    }else if(equiv(rec, "MKUSR")){
 
         cout << "Comando reconocido: MKUSR" << endl;
 
 
-    }else if(compare(rec, "RMUSR")){
+    }else if(equiv(rec, "RMUSR")){
 
         cout << "Comando reconocido: RMUSR" << endl;
 
 
-    }else if(compare(rec, "MKDIR")){
+    }else if(equiv(rec, "MKDIR")){
 
         cout << "Comando reconocido: MKDIR" << endl;
 
-    }else if(compare(rec, "REP")){
+    }else if(equiv(rec, "REP")){
         cout << "Comando reconocido: REPORTES" << endl;
         //generar los dos reportes principaes <--------------------
         //mbr y disk
-        report.generar(parametros, mount);
+        report.repzCrear(parametros, mount);
 
 
-    }else if(compare(rec, "EXEC")){
+    }else if(equiv(rec, "EXEC")){
         cout << "Comando reconocido: EXEC" << endl;
-        funcion_excec(parametros);
+        runExcec(parametros);
 
-    }else if(compare(rec.substr(0,1),"#")){
+    }else if(equiv(rec.substr(0,1),"#")){
         respuesta(">>>> COMENTARIO RECONOCIDO :) ",rec);
 
     }else{
@@ -268,7 +266,7 @@ string scanner::upper(string a){
     return up;  
 }
 
-bool scanner::compare(string a, string b){
+bool scanner::equiv(string a, string b){
     if (upper(a)==upper(b))
     {
         return true;
@@ -290,7 +288,7 @@ bool scanner::confirmar(string mensaje){
     cout << mensaje << "Confirmar(n), Otra letra para cancelar" << endl;
     string respuesta;
     getline(cin,respuesta);
-    if (compare(respuesta, "n"))
+    if (equiv(respuesta, "n"))
     {
         return true;
     }
@@ -298,13 +296,13 @@ bool scanner::confirmar(string mensaje){
     
 }
 
-void scanner::funcion_excec(vector<string> tokens){
+void scanner::runExcec(vector<string> tokens){
     string path = "";
     for (string token:tokens)
     {
         string tk = token.substr(0, token.find("="));
         token.erase(0,tk.length()+1);
-        if (compare(tk, "path"))
+        if (equiv(tk, "path"))
         {
             path = token;
         }
@@ -333,7 +331,7 @@ void scanner::excec(string path){
         string texto = i;
         string tk = rec(texto);
         if(texto!=""){
-            if(compare(texto,"PAUSE")){
+            if(equiv(texto,"PAUSE")){
                 string pause;
                 respuesta("PAUSE","Presione enter para continuar...");
                 getline(cin,pause);
