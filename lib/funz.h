@@ -1,16 +1,16 @@
-#ifndef SHARED_H
-#define SHARED_H
+#ifndef FUNZ_H
+#define FUNZ_H
 
 #include <string>
 #include <bits/stdc++.h>
 
 using namespace std;
 
-class Shared
+class Funz
 //notif es el handler
 {
 public:
-    Shared();
+    Funz();
     //------------------------------------------mayuscula
     string upper(string s);
     //------------------------------------------minuscula

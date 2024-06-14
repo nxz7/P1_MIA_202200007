@@ -7,7 +7,7 @@
 #include "../lib/disco.h"
 #include "../lib/scanner.h"
 #include "../lib/structs.h"
-#include "../lib/shared.h"
+#include "../lib/funz.h"
 
 using namespace std;
 
@@ -55,7 +55,7 @@ class Disk{
         vector<Structs::EBR> getlogics(Structs::Partition partition, string p);
         
     private:
-        Shared shared;   
+        Funz funz;   
     
 };
 

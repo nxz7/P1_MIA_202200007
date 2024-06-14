@@ -3,7 +3,7 @@
 
 #include <string>
 #include <bits/stdc++.h>
-#include "../lib/shared.h"
+#include "../lib/funz.h"
 #include "../lib/structs.h"
 #include "../lib/disco.h"
 
@@ -22,7 +22,7 @@ class Report {
     void repDisk(string p, string id);
 
     private:
-    Shared shared;
+    Funz funz;
     Disk disk;
     Mount mount;
 

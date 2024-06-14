@@ -38,11 +38,12 @@ void scanner::start()
         {
             string texto;
             getline(cin, texto);
-            //Clear();
-            if (equiv(texto, "exit"))
-            {
+            
+            //------------------------salida
+            if (equiv(texto, "exit")){
                 break;
             }
+
             string par = rec(texto); //este es la plabra clave
             texto.erase(0,par.length()+1);
             vector<string> parametros = recAgrupar_tokens(texto); //las instrucciones acosiadas a la plabara clave  -parametros
@@ -60,7 +61,7 @@ void scanner::start()
 
 
 
-
+//----------------------------------------------revisar cada inicial, comando y clasificar
 
 void scanner::functions(string rec, vector<string> parametros)
 {
@@ -160,35 +161,36 @@ void scanner::functions(string rec, vector<string> parametros)
 //revisa la plabra y mira que no sea un comentario, si es se trata como comentario -> break
 string scanner::rec(string text)
 {
-    string pal = "";
+    string wrdd = "";
     bool fin = false;
+
     for (char &c : text){
-        if (fin)
-        {
+
+        if (fin){
             if (c == ' ' || c == '-'){
                 break;
             }
-            pal += c;
+            wrdd += c;
         }
-        else if ((c != ' ' && !fin))
-        {
+        else if ((c != ' ' && !fin)){
+
             if (c=='#'){
-                pal=text;
+                wrdd=text;
                 break;
             }else{
-                pal += c;
+
+                wrdd += c;
                 fin = true;
             }
         }
     }
-    return pal;
+    return wrdd;
 }
 
-vector<string> scanner::recAgrupar(string text, string text_recAgrupar)
-{
+vector<string> scanner::recAgrupar(string text, string text_recAgrupar){
+
     vector<string> strr;
-    if (text.empty())
-    {
+    if (text.empty()){
         return strr;
     }
     
@@ -196,61 +198,82 @@ vector<string> scanner::recAgrupar(string text, string text_recAgrupar)
     char char_array[n + 1];
     strcpy(char_array, text.c_str());
     char* point = strtok(char_array, text_recAgrupar.c_str());
-    while (point!=NULL)
-    {
+
+    while (point!=NULL){
+
         strr.push_back(string(point));
         point = strtok(NULL, text_recAgrupar.c_str());
+
     }
+
     return strr;
 }
 
 vector<string> scanner::recAgrupar_tokens(string text){
     vector<string> tokens;
-    if (text.empty())
-    {
+
+    if (text.empty()){
+
         return tokens;
+
     }
+
     text.push_back(' ');
     string rec = "";
     int estado = 0;
+    //automata simple para reconocer: comentarios, parametros, parlabras
     for(char &c: text){
-        if (estado ==0 && c=='-')
-        {
+
+        if (estado ==0 && c=='-'){
+
             estado = 1;
 
         }else if(estado==0 && c=='#'){
+
             continue;
+
         }else if(estado!=0){
-            if (estado == 1)
-            {
+
+            if (estado == 1){
+
                 if(c=='='){
+
                     estado = 2;
+
                 }else if(c == ' '){
+
                     continue;
+
                 }
             }else if(estado == 2){
-                if (c=='\"')
-                {
+                if (c=='\"'){
+
                     estado = 3;
+
                 }else{
+
                     estado = 4;
+
                 }
                 
             }else if(estado == 3){
-                if (c=='\"')
-                {
+
+                if (c=='\"'){
+
                     estado = 4;
                 }
-            }else if (estado==4 && c=='\"')
-            {
+            }else if (estado==4 && c=='\"'){
+
                 tokens.clear();
                 continue;
-            }else if (estado ==4 && c==' ')
-            {
+
+            }else if (estado ==4 && c==' '){
+
                 estado = 0;
                 tokens.push_back(rec);
                 rec = "";
                 continue;
+
             }
             rec+=c;
         }
@@ -260,6 +283,7 @@ vector<string> scanner::recAgrupar_tokens(string text){
 
 string scanner::upper(string a){
     string up="";
+
     for(char &a: a){
         up+=toupper(a);
     }
@@ -267,8 +291,8 @@ string scanner::upper(string a){
 }
 
 bool scanner::equiv(string a, string b){
-    if (upper(a)==upper(b))
-    {
+    if (upper(a)==upper(b)){
+
         return true;
     }
     return false;
@@ -277,6 +301,7 @@ bool scanner::equiv(string a, string b){
 void scanner::errores(string operacion, string mensaje){
     
     cout << "\033[1;41m Error\033"<< "\033[0;31m(" + operacion + ")~~> \033[0m"<< mensaje << endl;
+
 }
 
 void scanner::respuesta(string operacion, string mensaje){
@@ -285,11 +310,11 @@ void scanner::respuesta(string operacion, string mensaje){
 }
 
 bool scanner::confirmar(string mensaje){
-    cout << mensaje << "Confirmar(n), Otra letra para cancelar" << endl;
+    cout << mensaje << "Confirmar(s), Otra letra para cancelar" << endl;
     string respuesta;
     getline(cin,respuesta);
-    if (equiv(respuesta, "n"))
-    {
+    if (equiv(respuesta, "s")){
+
         return true;
     }
     return false;
@@ -298,17 +323,19 @@ bool scanner::confirmar(string mensaje){
 
 void scanner::runExcec(vector<string> tokens){
     string path = "";
-    for (string token:tokens)
-    {
+
+    for (string token:tokens){
+
         string tk = token.substr(0, token.find("="));
         token.erase(0,tk.length()+1);
-        if (equiv(tk, "path"))
-        {
+        if (equiv(tk, "path")){
+
             path = token;
         }
     }
-    if (path.empty())
-    {
+
+    if (path.empty()){
+
         errores("EXEC","Se requiere path para este comando");
         return;
     }
@@ -320,28 +347,38 @@ void scanner::excec(string path){
     vector <string> lines;
     string line;
     ifstream input_file(filename);
+
     if(!input_file.is_open()){
         cerr << "No se puede abrir el archivo" << filename << endl;
         return;
     }
+
     while(getline(input_file,line)){
         lines.push_back(line);
     }
+    //loop de ir leyendo comanod por comanod
     for(const auto &i:lines){
+
         string texto = i;
         string tk = rec(texto);
         if(texto!=""){
+
             if(equiv(texto,"PAUSE")){
+
                 string pause;
                 respuesta("PAUSE","Presione enter para continuar...");
                 getline(cin,pause);
                 continue;
+
             }
+
             texto.erase(0,tk.length()+1);
             vector <string> tks = recAgrupar_tokens(texto);
             functions(tk,tks);
+
         }
     }
+
     input_file.close();
     return;
 }

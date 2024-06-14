@@ -3,7 +3,7 @@
 
 #include <string>
 #include <bits/stdc++.h>
-#include "../lib/shared.h"
+#include "../lib/funz.h"
 #include "../lib/structs.h"
 #include "../lib/disco.h"
 
@@ -31,12 +31,12 @@ class Mount {
 //------------------------------------montar 1 y 2
     void mount(vector<string> textzz);
 
-    void mount(string p, string n);
+    void mount2(string p, string n);
 //------------------------------------desmontar 1 y 2
 
     void unmount(vector<string> textzz);
 
-    void unmount(string id);
+    void unmount2(string id);
 
 //-----------------------------------lista para ver las partdiscos montados
 
@@ -46,7 +46,7 @@ class Mount {
 
     private:
     Disk dsk;
-    Shared shared;
+    Funz funz;
     //LETRA PARA LOS ID, EMPIAZA CON A 
     vector<char> letraMount = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r',
                              's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'};

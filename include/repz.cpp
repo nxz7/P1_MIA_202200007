@@ -17,25 +17,25 @@ void Report::repzCrear(vector<string> textzz, Mount m)
     string path;
     string id;
     for(string current:textzz){
-        string id_ = shared.lower(current.substr(0,current.find('=')));
+        string id_ = funz.lower(current.substr(0,current.find('=')));
         current.erase(0, id_.length()+1);
         if(current.substr(0,1) =="\"")
         {
             current = current.substr(1,current.length()-2);
         }
-        if(shared.equiv(id_,"name")){
+        if(funz.equiv(id_,"name")){
             if(count(required.begin(), required.end(), id_)){
                 auto itr = find(required.begin(), required.end(), id_);
                 required.erase(itr);
                 name = current;
             }
-        }else if(shared.equiv(id_,"id")){
+        }else if(funz.equiv(id_,"id")){
             if(count(required.begin(), required.end(), id_)){
                 auto itr = find(required.begin(), required.end(), id_);
                 required.erase(itr);
                 id = current;
             }
-        }else if(shared.equiv(id_,"path")){
+        }else if(funz.equiv(id_,"path")){
             if(count(required.begin(), required.end(), id_)){
                 auto itr = find(required.begin(), required.end(), id_);
                 required.erase(itr);
@@ -44,39 +44,39 @@ void Report::repzCrear(vector<string> textzz, Mount m)
         }
     }
     if(required.size()!=0){
-        shared.notif("REPORTES", "No estan los parametros necesarios para realizar un reporte");
+        funz.notif("REPORTES", "No estan los parametros necesarios para realizar un reporte");
         return;
     }
-    if (shared.equiv(name, "MBR")) {
+    if (funz.equiv(name, "MBR")) {
         mbr(path, id);
-    } else if (shared.equiv(name, "DISK")) {
+    } else if (funz.equiv(name, "DISK")) {
         repDisk(path, id);
 
-    } else if (shared.equiv(name, "INODE")) {
-        shared.msmSalida(">>>REPORTE", "EL REPORTE INODE NO SE ENCUENTRA DESARROLLADO AUN!!!");
+    } else if (funz.equiv(name, "INODE")) {
+        funz.msmSalida(">>>REPORTE", "EL REPORTE INODE NO SE ENCUENTRA DESARROLLADO AUN!!!");
 
-    } else if (shared.equiv(name, "BLOCK")) {
-        shared.msmSalida(">>>REPORTE", "EL REPORTE BLOCK NO SE ENCUENTRA DESARROLLADO AUN!!!");
+    } else if (funz.equiv(name, "BLOCK")) {
+        funz.msmSalida(">>>REPORTE", "EL REPORTE BLOCK NO SE ENCUENTRA DESARROLLADO AUN!!!");
 
-    } else if (shared.equiv(name, "BM_INODE")) {
-        shared.msmSalida(">>>REPORTE", "EL REPORTE BM INODE NO SE ENCUENTRA DESARROLLADO AUN!!!");
+    } else if (funz.equiv(name, "BM_INODE")) {
+        funz.msmSalida(">>>REPORTE", "EL REPORTE BM INODE NO SE ENCUENTRA DESARROLLADO AUN!!!");
 
-    } else if (shared.equiv(name, "BM_BLOCK")) {
-        shared.msmSalida(">>>REPORTE", "EL REPORTE BM BLOCK NO SE ENCUENTRA DESARROLLADO AUN!!!");
+    } else if (funz.equiv(name, "BM_BLOCK")) {
+        funz.msmSalida(">>>REPORTE", "EL REPORTE BM BLOCK NO SE ENCUENTRA DESARROLLADO AUN!!!");
         
-    } else if (shared.equiv(name, "SB")) {
-        shared.msmSalida(">>>REPORTE", "EL REPORTE SB  NO SE ENCUENTRA DESARROLLADO AUN!!!");
+    } else if (funz.equiv(name, "SB")) {
+        funz.msmSalida(">>>REPORTE", "EL REPORTE SB  NO SE ENCUENTRA DESARROLLADO AUN!!!");
 
-    } else if (shared.equiv(name, "TREE")) {
+    } else if (funz.equiv(name, "TREE")) {
 
-        shared.msmSalida(">>>REPORTE", "EL REPORTE TREE NO SE ENCUENTRA DESARROLLADO AUN!!!");
+        funz.msmSalida(">>>REPORTE", "EL REPORTE TREE NO SE ENCUENTRA DESARROLLADO AUN!!!");
 
-    }  else if (shared.equiv(name, "Journaling")) {
+    }  else if (funz.equiv(name, "Journaling")) {
         
-        shared.msmSalida(">>>REPORTE", "EL REPORTE JOURNALING NO SE ENCUENTRA DESARROLLADO AUN!!!");
+        funz.msmSalida(">>>REPORTE", "EL REPORTE JOURNALING NO SE ENCUENTRA DESARROLLADO AUN!!!");
     } else {
 
-        shared.notif("REPORTES", "El reporte elegido no es reconocido, por favor revisar la lista de reportes disponibles");
+        funz.notif("REPORTES", "El reporte elegido no es reconocido, por favor revisar la lista de reportes disponibles");
         return;
     }
 }
@@ -240,11 +240,10 @@ void Report::mbr(string p, string id) {
         outfile.close();
         string function = "dot -Tjpg " + pd + " -o " + p;
         system(function.c_str());
-        //function = "rm \"" + pd + "\"";
-        //system(function.c_str());
-        shared.msmSalida(">>>REPORTE", "EL REPORTE MBR SE HA CREADO CON EXITO !!!");
+        //si no hubo error ap pasarlo a jpg sale el mensaje
+        funz.msmSalida(">>>REPORTE", "EL REPORTE MBR SE HA CREADO CON EXITO !!!");
     } catch (exception &e) {
-        shared.notif(">>>REPORTE", e.what());
+        funz.notif(">>>REPORTE", e.what());
     }
 }
 
@@ -401,10 +400,9 @@ void Report::repDisk(string p, string id){
         outfile.close();
         string function = "dot -Tjpg " + pd + " -o " + p;
         system(function.c_str());
-        //function = "rm \"" + pd + "\"";
-        //system(function.c_str());
-        shared.msmSalida("REPORT", "EL REPORTE SE GENERO DE MANERA CORRECTA!!!!");
+        //si se logro generar
+        funz.msmSalida("REPORT", "EL REPORTE SE GENERO DE MANERA CORRECTA!!!!");
     } catch (exception &e) {
-        shared.notif("REPORT", e.what());
+        funz.notif("REPORT", e.what());
     }
 }

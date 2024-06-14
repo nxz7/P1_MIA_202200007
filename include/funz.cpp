@@ -1,4 +1,4 @@
-#include "../lib/shared.h"
+#include "../lib/funz.h"
 
 #include <iostream>
 #include <stdlib.h>
@@ -9,11 +9,11 @@
 
 using namespace std;
 
-Shared::Shared()
+Funz::Funz()
 {
 }
 
-string Shared::upper(string s)
+string Funz::upper(string s)
 {
     string u;
     locale loc;
@@ -24,7 +24,7 @@ string Shared::upper(string s)
     return u;
 }
 
-string Shared::lower(string s)
+string Funz::lower(string s)
 {
     string u;
     locale loc;
@@ -35,7 +35,7 @@ string Shared::lower(string s)
     return u;
 }
 
-bool Shared::equiv(string s1, string s2)
+bool Funz::equiv(string s1, string s2)
 {
     s1 = upper(s1);
     s2 = upper(s2);
@@ -48,7 +48,7 @@ bool Shared::equiv(string s1, string s2)
 
 
 //para que tire los errores
-void Shared::notif(string title, string message)
+void Funz::notif(string title, string message)
 {
     cout << "\033[1;31m Error: \033"
         << "\033[0;31m(" + title + ")~> \033[0m"
@@ -57,21 +57,21 @@ void Shared::notif(string title, string message)
 
 
 //si y no, pide confirmacion
-bool Shared::confirmation(string title, string message)
+bool Funz::confirmation(string title, string message)
 {
-    cout << "\033[1;36m Confirmación: \033"
+    cout << "\033[1;36m desea confirmar: \033"
         << "\033[0;36m(" + title + ")~> \033[0m"
-        << "¿" + message + "? Y/N : ";
+        << "¿" + message + "? s/n : ";
     string action;
     getline(cin, action);
-    if (equiv(action, "y") || equiv(action, "yes"))
-    {
+    if (equiv(action, "S") || equiv(action, "s")){
+        
         return true;
     }
     return false;
 }
 
-void Shared::msmSalida(string title, string message)
+void Funz::msmSalida(string title, string message)
 {
     cout << "\033[0;32m (" + title + "): \033[0m"
         << message << endl;
