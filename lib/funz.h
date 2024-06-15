@@ -12,11 +12,11 @@ class Funz
 public:
     Funz();
     //------------------------------------------mayuscula
-    string upper(string s);
+    string upper(string dato);
     //------------------------------------------minuscula
-    string lower(string s);
+    string lower(string dato);
     //------------------------------------------compara dos, si son igual T, si son dif F
-    bool equiv(string s1, string s2);
+    bool equiv(string dato1, string dato2);
     //------------------------------------------mensaje que se muestra - error
     void notif(string title, string message);
     bool confirmation(string title, string message);

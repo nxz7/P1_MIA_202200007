@@ -13,33 +13,33 @@ Funz::Funz()
 {
 }
 
-string Funz::upper(string s)
+string Funz::upper(string dato)
 {
     string u;
     locale loc;
-    for (int i = 0; i < s.length(); i++)
+    for (int i = 0; i < dato.length(); i++)
     {
-        u += toupper(s[i], loc);
+        u += toupper(dato[i], loc);
     }
     return u;
 }
 
-string Funz::lower(string s)
+string Funz::lower(string dato)
 {
     string u;
     locale loc;
-    for (int i = 0; i < s.length(); i++)
+    for (int i = 0; i < dato.length(); i++)
     {
-        u += tolower(s[i], loc);
+        u += tolower(dato[i], loc);
     }
     return u;
 }
 
-bool Funz::equiv(string s1, string s2)
+bool Funz::equiv(string dato1, string dato2)
 {
-    s1 = upper(s1);
-    s2 = upper(s2);
-    if (s1 == s2)
+    dato1 = upper(dato1);
+    dato2 = upper(dato2);
+    if (dato1 == dato2)
     {
         return true;
     }
@@ -50,7 +50,7 @@ bool Funz::equiv(string s1, string s2)
 //para que tire los errores
 void Funz::notif(string title, string message)
 {
-    cout << "\033[1;31m Error: \033"
+    cout << "\033[1;31m Error! : \033"
         << "\033[0;31m(" + title + ")~> \033[0m"
         << message << endl;
 }
@@ -71,8 +71,8 @@ bool Funz::confirmation(string title, string message)
     return false;
 }
 
-void Funz::msmSalida(string title, string message)
-{
-    cout << "\033[0;32m (" + title + "): \033[0m"
-        << message << endl;
+
+void Funz::msmSalida(string title, string message){
+    //rosa
+    cout << "\033[38;2;255;105;180m(" + title + "): \033[0m" << message << endl;
 }

@@ -68,7 +68,7 @@ void Mount::mount2(string p, string n) {
 
         FILE *validate = fopen(p.c_str(), "r");
         if (validate == NULL) {
-
+            funz.notif("MOUNT", "el id no existe o no es valido, revisar!");
             throw runtime_error("el id no existe o no es valido, revisar!");
         }
 
@@ -87,7 +87,7 @@ void Mount::mount2(string p, string n) {
                 n = ebr.part_name;
                 //se mira lo de la part logca --> ya agregada
             } else {
-
+                funz.notif("MOUNT", "es imposible realizar un mount sobre una particion extendida, revisar!!");
                 throw runtime_error("es imposible realizar un mount sobre una particion extendida, revisar!!");
             }
         }
@@ -191,6 +191,7 @@ void Mount::unmount2(string id) {
     try {
         //fijo debe empezar por el 07, si no de una no existe
         if (!(id[0] == '0' && id[1] == '7')) {
+            funz.notif("MOUNT", "El id no es correcto, el error se encuentra en los 2 primeros numeros!!");
             throw runtime_error("El id no es correcto, el error se encuentra en los 2 primeros numeros");
         }
         string past = id;
@@ -199,7 +200,7 @@ void Mount::unmount2(string id) {
         id.pop_back();
         int i = stoi(id) - 1;
         if (i < 0) {
-
+            funz.notif("MOUNT", "el id no existe o no es valido, revisar!");
             throw runtime_error("el id no existe o no es valido, revisar!");
         }
 
@@ -216,7 +217,9 @@ void Mount::unmount2(string id) {
             }
         }
 
+        funz.notif("MOUNT", "el id indicado no existe o no esta disponible, no se pudo desmontar --> unable to unmount");
         throw runtime_error("el id indicado no existe o no esta disponible, no se pudo desmontar --> unable to unmount");
+
     }
     catch (invalid_argument &e) {
         //revisa si el id es valido, entero
@@ -236,7 +239,9 @@ Structs::Partition Mount::getmount(string id, string *p) {
 
     if (!(id[0] == '0' && id[1] == '7')) {
 
+        funz.notif("MOUNT", "El id no es correcto, el error se encuentra en los 2 primeros numeros");
         throw runtime_error("El id no es correcto, el error se encuentra en los 2 primeros numeros");
+
 
     }
 
@@ -248,7 +253,9 @@ Structs::Partition Mount::getmount(string id, string *p) {
 
     if (i < 0) {
 
+        funz.notif("MOUNT", "el id no existe o no es valido, revisar!");
         throw runtime_error("el id no existe o no es valido, revisar!");
+        
 
     }
 
@@ -261,6 +268,7 @@ Structs::Partition Mount::getmount(string id, string *p) {
                 if (validate == NULL) {
 
                     //en caso de que no lo pueda abrir
+                    funz.notif("MOUNT", "el disco al que hace referencia no existe o no esta disponible, revisar!");
                     throw runtime_error("el disco al que hace referencia no existe o no esta disponible, revisar!");
 
                 }
@@ -275,5 +283,6 @@ Structs::Partition Mount::getmount(string id, string *p) {
         }
     }
 
+    funz.notif("MOUNT", "la particion a la que hace referencia no existe o no esta disponible, revisar!");
     throw runtime_error("la particion a la que hace referencia no existe o no esta disponible, revisar!");
 }

@@ -29,10 +29,10 @@ void Clear()
 void scanner::start()
 {
     system("clear");
-        cout << ">>>>>>>>>>>>>>>>> PROYECTO 1 \n" << endl;
-        cout << ">>>>>>>>>>>>>>>>> NATALIA MARIEL CALDERON ECHEVERRIA \n" << endl;
-        cout << ">>>>>>>>>>>>>>>>>202200007 \n" << endl;
-        cout << ">>>>>>>>>>>>>>>>>INGRESE UN COMANDO(exit -> salir) \n" << endl;
+        std::cout << "\033[33m>>>>>>>>>>>>>>>>> PROYECTO 1 \n\033[0m" << std::endl;
+        std::cout << "\033[33m>>>>>>>>>>>>>>>>> NATALIA MARIEL CALDERON ECHEVERRIA  \n\033[0m" << std::endl;
+        std::cout << "\033[33m>>>>>>>>>>>>>>>>>202200007 \n\033[0m" << std::endl;
+        std::cout << "\033[33m>>>>>>>>>>>>>>>>>INGRESE UN COMANDO(exit -> salir) \n\033[0m" << std::endl;
         cout << ">>";
         while (true)
         {
@@ -50,11 +50,11 @@ void scanner::start()
             functions(par, parametros);
             cout << "\n >>>>continuar ? (enter)" << endl;
             getline(cin,texto);
-            //Clear();
-            cout << ">>>>>>>>>>>>>>>>> PROYECTO 1 \n" << endl;
-            cout << ">>>>>>>>>>>>>>>>> NATALIA MARIEL CALDERON ECHEVERRIA \n" << endl;
-            cout << ">>>>>>>>>>>>>>>>>202200007 \n" << endl;
-            cout << ">>>>>>>>>>>>>>>>>INGRESE UN COMANDO(exit -> salir) \n" << endl;
+            
+            std::cout << "\033[33m>>>>>>>>>>>>>>>>> PROYECTO 1 \n\033[0m" << std::endl;
+            std::cout << "\033[33m>>>>>>>>>>>>>>>>> NATALIA MARIEL CALDERON ECHEVERRIA \n\033[0m" << std::endl;
+            std::cout << "\033[33m>>>>>>>>>>>>>>>>>202200007 \n\033[0m" << std::endl;
+            std::cout << "\033[33m>>>>>>>>>>>>>>>>>INGRESE UN COMANDO(exit -> salir) \n\033[0m" << std::endl;
             cout << ">>";
         }
 }
@@ -80,90 +80,104 @@ void scanner::functions(string rec, vector<string> parametros)
         }
 
         disco.mkdisk(parametros); 
+        cout << "**************************************" << endl;
     }else if(equiv(rec, "RMDISK")){
         cout << "Comando reconocido: RMDISK" << endl;
         disco.rmdisk(parametros);
+        cout << "**************************************" << endl;
 
     }else if(equiv(rec, "FDISK")){
         cout << "Comando reconocido: FDISK" << endl;
         disco.fdisk(parametros);
+        cout << "**************************************" << endl;
 
     }else if(equiv(rec, "MOUNT")){
         cout << "Comando reconocido: MOUNT" << endl;
         mount.mount(parametros);
+        cout << "**************************************" << endl;
 
     }else if(equiv(rec, "UNMOUNT")){
         cout << "Comando reconocido: UNMOUNT" << endl;
         mount.unmount(parametros);
-
+        cout << "**************************************" << endl;
 
 
     }else if(equiv(rec, "MKFS")){
         cout << "Comando reconocido: MKFS" << endl;
-
+        cout << "**************************************" << endl;
 
     }else if(equiv(rec, "LOGIN")){
 
         cout << "Comando reconocido: LOGIN" << endl;
         cout << "------> iniciando sesion" << endl;
-
+        cout << "**************************************" << endl;
 
     }else if(equiv(rec, "LOGOUT")){
 
         cout << "Comando reconocido: LOGOUT" << endl;
         cout << "------> cerrando sesion" << endl;
-
+        cout << "**************************************" << endl;
 
     }else if(equiv(rec, "MKGRP")){
 
         cout << "Comando reconocido:  MKGRP" << endl;
-
+        cout << "**************************************" << endl;
 
     }else if(equiv(rec, "RMGRP")){
 
         cout << "Comando reconocido: RMGRP" << endl;
-
+        cout << "**************************************" << endl;
 
     }else if(equiv(rec, "MKUSR")){
 
         cout << "Comando reconocido: MKUSR" << endl;
-
+        cout << "**************************************" << endl;
 
     }else if(equiv(rec, "RMUSR")){
 
         cout << "Comando reconocido: RMUSR" << endl;
-
+        cout << "**************************************" << endl;
 
     }else if(equiv(rec, "MKDIR")){
 
         cout << "Comando reconocido: MKDIR" << endl;
+        cout << "**************************************" << endl;
 
     }else if(equiv(rec, "REP")){
         cout << "Comando reconocido: REPORTES" << endl;
         //generar los dos reportes principaes <--------------------
         //mbr y disk
         report.repzCrear(parametros, mount);
+        cout << "**************************************" << endl;
 
 
     }else if(equiv(rec, "EXEC")){
         cout << "Comando reconocido: EXEC" << endl;
         runExcec(parametros);
+        cout << "**************************************" << endl;
 
     }else if(equiv(rec.substr(0,1),"#")){
-        respuesta(">>>> COMENTARIO RECONOCIDO :) ",rec);
+        respuesta(">>>> COMENTARIO RECONOCIDO <3 ",rec);
+        cout << "**************************************" << endl;
 
-    }else{
+    }else if(equiv(rec, "PAUSE")){
+            string pause;
+            respuesta("PAUSE","programa en pausa, seleccione cualquier letra para continuar");
+            getline(cin,pause);
+            cout << "**************************************" << endl;
+
+    }
+    else{
         errores("SYSTEM","EL COMANDO NO ESTA ENTRE LOS COMANDOS RECONOCIDOS, VERIFICAR! >>> \""+rec+"\"");
     }
 }
 
 
 //revisa la plabra y mira que no sea un comentario, si es se trata como comentario -> break
-string scanner::rec(string text)
-{
+string scanner::rec(string text){
+
     string wrdd = "";
     bool fin = false;
-
     for (char &c : text){
 
         if (fin){
@@ -300,17 +314,18 @@ bool scanner::equiv(string a, string b){
 
 void scanner::errores(string operacion, string mensaje){
     
-    cout << "\033[1;41m Error\033"<< "\033[0;31m(" + operacion + ")~~> \033[0m"<< mensaje << endl;
+    cout << "\033[1;41m Error!!\033"<< "\033[0;31m(" + operacion + ")~~> \033[0m"<< mensaje << endl;
 
 }
 
 void scanner::respuesta(string operacion, string mensaje){
-    
-    cout << "\033[0;42m<" + operacion + ">---------> \033[0m"<< mensaje << endl;
+    //rosado
+    cout << "\033[48;2;255;105;180m<" + operacion + ">---------> \033[0m"<< mensaje << endl;
 }
 
+
 bool scanner::confirmar(string mensaje){
-    cout << mensaje << "Confirmar(s), Otra letra para cancelar" << endl;
+    cout << mensaje << "Confirmar, presione s" << endl;
     string respuesta;
     getline(cin,respuesta);
     if (equiv(respuesta, "s")){
@@ -349,7 +364,7 @@ void scanner::excec(string path){
     ifstream input_file(filename);
 
     if(!input_file.is_open()){
-        cerr << "No se puede abrir el archivo" << filename << endl;
+        cerr << "No se puede abrir el archivo---->" << filename << endl;
         return;
     }
 
@@ -366,7 +381,7 @@ void scanner::excec(string path){
             if(equiv(texto,"PAUSE")){
 
                 string pause;
-                respuesta("PAUSE","Presione enter para continuar...");
+                respuesta("PAUSE","programa en pausa, seleccione cualquier letra para continuar");
                 getline(cin,pause);
                 continue;
 
