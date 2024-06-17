@@ -306,7 +306,7 @@ void Disk::rmdisk(vector<string> tokens) {
     }
 //-----------------------------------confirmacion obligaorioa
     char confirmation;
-    std::cout << "seguro que quiere borrar la el disco? (s/n): ";
+    std::cout << "seguro que quiere borrar el disco? (s/n): ";
     std::cin >> confirmation;
     if (confirmation != 's' && confirmation != 'S') {
         std::cout << "Entendido, la particion no se borrara" << std::endl;
